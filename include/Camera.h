@@ -32,6 +32,8 @@ public:
 	// 处理相机的鼠标键盘操作
 	void keyboard(GLFWwindow* window);
 	void mouse(double xpos, double ypos);
+	// 计算deltaTime
+	void caldeltaTime(float currentFrame);
 	// 模视矩阵
 	glm::mat4 viewMatrix;
 	glm::mat4 projMatrix;
@@ -60,5 +62,8 @@ public:
 	float sensitivity;
 	float cameraSpeed;
 	bool firstMouse;
+	// 渲染时间，用于平衡不同机器的移动速度
+	float deltaTime; // 当前帧与上一帧的时间差
+	float lastFrame; // 上一帧的时间
 };
 #endif

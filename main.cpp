@@ -301,6 +301,8 @@ int main(int argc, char **argv)
 	glEnable(GL_BLEND);
 	while (!glfwWindowShouldClose(window))
 	{
+		//计算当前帧与上一帧时间差
+		camera->caldeltaTime(glfwGetTime());
 		//接受键盘输入
 		process_key_input(window);
 

@@ -30,7 +30,6 @@ glm::mat4 Camera::lookAt(const glm::vec4& eye, const glm::vec4& at, const glm::v
 	glm::vec3 up_3 = up;
 	glm::mat4 view = glm::lookAt(eye_3, eye_3 + front_3, up_3);
 
-	//std::cout << front.x << " " << front.y << " " << front.z << std::endl;
 	return view;
 }
 
@@ -88,15 +87,20 @@ glm::mat4 Camera::frustum(const GLfloat left, const GLfloat right,
 	return c;
 }
 
-
-
 void Camera::updateCamera()
 {
 	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
 	front.y = sin(glm::radians(pitch));
 	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
 	front = glm::normalize(front);
-	std::cout << front.x << " " << front.y << " " << front.z << std::endl;
+	//std::cout << front.x << " " << front.y << " " << front.z << std::endl;
+}
+
+void Camera::caldeltaTime(float currentFrame)
+{
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
+	cameraSpeed = 2.0f * deltaTime;
 }
 
 void Camera::initCamera(){
@@ -115,7 +119,7 @@ void Camera::initCamera(){
 	pitch = 0.0f, yaw = -90.0f;
 	lastX = 800.0f, lastY = 450.0f;
 	sensitivity = 0.02;
-	cameraSpeed = 0.0005;
+	cameraSpeed = 0.005;
 	firstMouse = true;
 }
 
