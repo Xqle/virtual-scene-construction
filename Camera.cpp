@@ -119,7 +119,7 @@ void Camera::initCamera(){
 	rotateAngle = 0.0;
 	upAngle = 0.0;
 	fovy = 45.0;
-	aspect = 1.0;
+	aspect = 16.0/9.0;
 	scale = 1.5;
 	zNear = 0.01;
 	zFar = 100.0;

@@ -116,7 +116,10 @@ void init()
 	meshList.push_back(cube);
 	
 	monu9->setNormalize(false);
-	monu9->readObj("assets/monu9/monu9.obj");
+	monu9->readObj("assets/monu9/monu9.obj"); 
+	monu9->setTranslation(glm::vec3(0.0, 0.0, 0.0));
+	monu9->setRotation(glm::vec3(0.0, 0.0, 0.0));
+	monu9->setScale(glm::vec3(0.3, 0.3, 0.3));
 	painter->addMesh(monu9, "monu9", "assets/monu9/monu9.png", vshader, tfshader);
 	meshList.push_back(monu9);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -146,9 +149,8 @@ void display()
 	//// 绘制小臂	
 	//lower_arm(modelView);
 
-	glm::mat4 modelView = glm::mat4(1.0);
-	modelView = glm::translate(modelView, glm::vec3(-2, -4, 0));
-	modelView = glm::scale(modelView, glm::vec3(0.5, 0.5, 0.5));
+	glm::mat4 modelView = monu9->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(-4, -8, 2));
 	drawMonu9(modelView);
 }
 
@@ -257,7 +259,7 @@ int main(int argc, char **argv)
 #endif
 
 	// 配置窗口属性
-	GLFWwindow* window = glfwCreateWindow(600, 600, "2019152051_Xuqile_Robot-1", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1600, 900, "2019152051_Xuqile_Robot-1", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
