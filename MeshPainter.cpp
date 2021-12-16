@@ -166,7 +166,7 @@ void MeshPainter::drawMesh(TriMesh* mesh, openGLObject &object, Light *light, Ca
 
     
 	// 将材质和光源数据传递给着色器
-	// bindLightAndMaterial(mesh, object, light, camera);
+	bindLightAndMaterial(mesh, object, light, camera);
 	// 绘制
 	glDrawArrays(GL_TRIANGLES, 0, mesh->getPoints().size());
 
@@ -181,6 +181,7 @@ void MeshPainter::drawMesh(TriMesh* mesh, openGLObject &object, Light *light, Ca
 void MeshPainter::drawMesh(int i, glm::mat4 modelMatrix, Light *light, Camera* camera){
     
 	openGLObject &object = opengl_objects[i];
+	TriMesh* mesh = meshes[i];
     // 相机矩阵计算
 	camera->updateCamera();
 	camera->viewMatrix = camera->getViewMatrix();
@@ -203,7 +204,7 @@ void MeshPainter::drawMesh(int i, glm::mat4 modelMatrix, Light *light, Camera* c
 
     
 	// 将材质和光源数据传递给着色器
-	// bindLightAndMaterial(mesh, object, light, camera);
+	bindLightAndMaterial(mesh, object, light, camera);
 	// 绘制
 	// drawMesh(meshes[i], opengl_objects[i], light, camera);
 

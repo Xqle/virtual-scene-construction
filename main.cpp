@@ -104,6 +104,14 @@ void init()
 	vshader = "shaders/vshader.glsl";
 	cfshader = "shaders/cfshader.glsl";
 	tfshader = "shaders/tfshader.glsl";
+
+	// 设置光源位置
+	light->setTranslation(glm::vec3(0.0, 10.0, 2.0));
+	light->setScale(glm::vec3(0.05, 0.05, 0.05));
+	light->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 环境光
+	light->setDiffuse(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 漫反射
+	light->setSpecular(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 镜面反射
+
 	//创建机器臂的基础立方体
 	cube->setNormalize(false);
 	cube->generateCube();
@@ -120,6 +128,10 @@ void init()
 	monu9->setTranslation(glm::vec3(0.0, 0.0, 0.0));
 	monu9->setRotation(glm::vec3(0.0, 0.0, 0.0));
 	monu9->setScale(glm::vec3(0.3, 0.3, 0.3));
+	monu9->setAmbient(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 环境光
+	monu9->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
+	monu9->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
+	monu9->setShininess(1.0); //高光系数
 	painter->addMesh(monu9, "monu9", "assets/monu9/monu9.png", vshader, tfshader);
 	meshList.push_back(monu9);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
