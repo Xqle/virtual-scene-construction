@@ -23,6 +23,7 @@ int HEIGHT = 600;
 int mainWindow;
 
 TriMesh* cube = new TriMesh();
+TriMesh* monu9 = new TriMesh();
 
 Camera* camera = new Camera();
 Light* light = new Light();
@@ -92,13 +93,17 @@ void lower_arm(glm::mat4 modelView)
 	painter->drawMesh(0, modelView * instance, light, camera);
 }
 
+void drawMonu9(glm::mat4 modelView)
+{
+	painter->drawMesh(1, modelView, light, camera);
+}
 void init()
 {
-	std::string vshader, fshader;
+	std::string vshader, cfshader, tfshader;
 	// 读取着色器并使用
 	vshader = "shaders/vshader.glsl";
-	fshader = "shaders/fshader.glsl";
-
+	cfshader = "shaders/cfshader.glsl";
+	tfshader = "shaders/tfshader.glsl";
 	//创建机器臂的基础立方体
 	cube->setNormalize(false);
 	cube->generateCube();
@@ -107,9 +112,13 @@ void init()
 	cube->setScale(glm::vec3(1.0, 1.0, 1.0));
 	// 加到painter中
 	// 指定纹理与着色器，因为不用纹理图片所以就传个空字符串进去了
-	painter->addMesh(cube, "Cube", "", vshader, fshader);
+	painter->addMesh(cube, "Cube", "", vshader, cfshader);
 	meshList.push_back(cube);
 	
+	monu9->setNormalize(false);
+	monu9->readObj("assets/monu9/monu9.obj");
+	painter->addMesh(monu9, "monu9", "assets/monu9/monu9.png", vshader, tfshader);
+	meshList.push_back(monu9);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
@@ -120,23 +129,27 @@ void display()
 // #endif
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// 绘制底座 
+	//// 绘制底座 
+	//glm::mat4 modelView = glm::mat4(1.0);
+	//modelView = glm::translate(modelView, glm::vec3(0.0, -BASE_HEIGHT, 0.0));// 稍微下移一下，让机器人整体居中在原点
+	//modelView = glm::rotate(modelView, glm::radians(Theta[Base]), glm::vec3(0.0, 1.0, 0.0));// 底座旋转矩阵
+	//base(modelView); // 首先绘制底座
+
+ //   // @TODO: 在此添加代码完成整个机械手臂绘制
+	//// 大臂变换矩阵
+	//modelView = glm::rotate(modelView, glm::radians(Theta[UpperArm]), glm::vec3(0.0, 1.0, 0.0));// 底座旋转矩阵
+	//// 绘制大臂
+	//upper_arm(modelView);
+
+	//// 小臂变换矩阵
+	//modelView = glm::rotate(modelView, glm::radians(Theta[LowerArm]), glm::vec3(0.0, 1.0, 0.0));// 底座旋转矩阵
+	//// 绘制小臂	
+	//lower_arm(modelView);
+
 	glm::mat4 modelView = glm::mat4(1.0);
-	modelView = glm::translate(modelView, glm::vec3(0.0, -BASE_HEIGHT, 0.0));// 稍微下移一下，让机器人整体居中在原点
-	modelView = glm::rotate(modelView, glm::radians(Theta[Base]), glm::vec3(0.0, 1.0, 0.0));// 底座旋转矩阵
-	base(modelView); // 首先绘制底座
-
-    // @TODO: 在此添加代码完成整个机械手臂绘制
-	// 大臂变换矩阵
-	modelView = glm::rotate(modelView, glm::radians(Theta[UpperArm]), glm::vec3(0.0, 1.0, 0.0));// 底座旋转矩阵
-	// 绘制大臂
-	upper_arm(modelView);
-
-	// 小臂变换矩阵
-	modelView = glm::rotate(modelView, glm::radians(Theta[LowerArm]), glm::vec3(0.0, 1.0, 0.0));// 底座旋转矩阵
-	// 绘制小臂	
-	lower_arm(modelView);
-
+	modelView = glm::translate(modelView, glm::vec3(-2, -4, 0));
+	modelView = glm::scale(modelView, glm::vec3(0.5, 0.5, 0.5));
+	drawMonu9(modelView);
 }
 
 
