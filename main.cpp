@@ -195,33 +195,43 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
 	float tmp;
 	glm::vec4 ambient;
-	if (action == GLFW_PRESS) {
+	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
 		switch (key)
 		{
 		case GLFW_KEY_ESCAPE: exit(EXIT_SUCCESS); break;
-		case GLFW_KEY_Q: exit(EXIT_SUCCESS); break;
-		case GLFW_KEY_1: Axis = Base; break;
-		case GLFW_KEY_2: Axis = UpperArm; break;
-		case GLFW_KEY_3: Axis = LowerArm; break;
-		// 通过按键旋转
-		case GLFW_KEY_A: 
-			Theta[Axis] += 5.0;
-			if (Theta[Axis] > 360.0)
-				Theta[Axis] -= 360.0;
-			break;
-		case GLFW_KEY_S:
-			Theta[Axis] -= 5.0;
-			if (Theta[Axis] < 0.0)
-				Theta[Axis] += 360.0;
-			break;
+		//case GLFW_KEY_Q: exit(EXIT_SUCCESS); break;
+		//case GLFW_KEY_1: Axis = Base; break;
+		//case GLFW_KEY_2: Axis = UpperArm; break;
+		//case GLFW_KEY_3: Axis = LowerArm; break;
+		//// 通过按键旋转
+		//case GLFW_KEY_A: 
+		//	Theta[Axis] += 5.0;
+		//	if (Theta[Axis] > 360.0)
+		//		Theta[Axis] -= 360.0;
+		//	break;
+		//case GLFW_KEY_S:
+		//	Theta[Axis] -= 5.0;
+		//	if (Theta[Axis] < 0.0)
+		//		Theta[Axis] += 360.0;
+		//	break;
 		default:
-			camera->keyboard(key, action, mode);
+			camera->keyboard(window);
 			break;
 		}
 	}
 }
 
+void process_key_input(GLFWwindow *window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		exit(EXIT_SUCCESS);
+	else camera->keyboard(window);
+}
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	camera->mouse(xpos, ypos);
+}
 void cleanData() {
 	// 释放内存
 	
@@ -267,8 +277,11 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-	glfwSetKeyCallback(window, key_callback);
+	//glfwSetKeyCallback(window, key_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	//鼠标
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, mouse_callback);
 
 	// 调用任何OpenGL的函数之前初始化GLAD
 	// ---------------------------------------
@@ -288,6 +301,9 @@ int main(int argc, char **argv)
 	glEnable(GL_BLEND);
 	while (!glfwWindowShouldClose(window))
 	{
+		//接受键盘输入
+		process_key_input(window);
+
 		display();
 
 		// 交换颜色缓冲 以及 检查有没有触发什么事件（比如键盘输入、鼠标移动等）

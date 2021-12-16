@@ -29,9 +29,9 @@ public:
 	void updateCamera();
 	// 初始化相机参数
 	void initCamera();
-	// 处理相机的键盘操作
-	void keyboard(int key, int action, int mode);
-
+	// 处理相机的鼠标键盘操作
+	void keyboard(GLFWwindow* window);
+	void mouse(double xpos, double ypos);
 	// 模视矩阵
 	glm::mat4 viewMatrix;
 	glm::mat4 projMatrix;
@@ -43,6 +43,7 @@ public:
 	glm::vec4 eye;
 	glm::vec4 at;
 	glm::vec4 up;
+	glm::vec4 front;  //相机看向的方向
 
 	// 投影参数
 	float zNear;
@@ -52,6 +53,12 @@ public:
 	float aspect;
 	// 正交投影参数
 	float scale;
-
+	// 鼠标控制视角
+	float pitch;
+	float yaw;
+	float lastX, lastY;
+	float sensitivity;
+	float cameraSpeed;
+	bool firstMouse;
 };
 #endif

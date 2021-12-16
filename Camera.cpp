@@ -1,4 +1,5 @@
 ﻿#include "Camera.h"
+#include <iostream>
 
 Camera::Camera() { 
 	initCamera();
@@ -8,7 +9,7 @@ Camera::~Camera() {}
 
 glm::mat4 Camera::getViewMatrix()
 {
-	return this->lookAt(eye, at, up);
+	return this->lookAt(eye, front, up);
 }
 
 glm::mat4 Camera::getProjectionMatrix(bool isOrtho)
@@ -25,11 +26,11 @@ glm::mat4 Camera::lookAt(const glm::vec4& eye, const glm::vec4& at, const glm::v
 {
 	// use glm.
 	glm::vec3 eye_3 = eye;
-	glm::vec3 at_3 = at;
+	glm::vec3 front_3 = front;
 	glm::vec3 up_3 = up;
+	glm::mat4 view = glm::lookAt(eye_3, eye_3 + front_3, up_3);
 
-	glm::mat4 view = glm::lookAt(eye_3, at_3, up_3);
-
+	//std::cout << front.x << " " << front.y << " " << front.z << std::endl;
 	return view;
 }
 
@@ -91,27 +92,11 @@ glm::mat4 Camera::frustum(const GLfloat left, const GLfloat right,
 
 void Camera::updateCamera()
 {
-	// 使用相对于at的角度控制相机的时候，注意在upAngle大于90的时候，相机坐标系的u向量会变成相反的方向，
-	// 要将up的y轴改为负方向才不会发生这种问题
-
-	// 也可以考虑直接控制相机自身的俯仰角，
-	// 保存up，eye-at 这些向量，并修改这些向量方向来控制
-	// 看到这里的有缘人可以试一试
-	up = glm::vec4(0.0, 1.0, 0.0, 0.0);
-	if (upAngle > 90){
-		up.y = -1;
-	}
-	else if (upAngle < -90){
-		up.y = -1;
-	}
-	
-	float eyex = radius * cos(upAngle * M_PI / 180.0) * sin(rotateAngle * M_PI / 180.0);
-	float eyey = radius * sin(upAngle * M_PI / 180.0);
-	float eyez = radius * cos(upAngle * M_PI / 180.0) * cos(rotateAngle * M_PI / 180.0);
-
-	eye = glm::vec4(eyex, eyey, eyez, 1.0);
-	at = glm::vec4(0.0, 0.0, 0.0, 1.0);
-
+	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+	front.y = sin(glm::radians(pitch));
+	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+	front = glm::normalize(front);
+	std::cout << front.x << " " << front.y << " " << front.z << std::endl;
 }
 
 void Camera::initCamera(){
@@ -119,45 +104,78 @@ void Camera::initCamera(){
 	rotateAngle = 0.0;
 	upAngle = 0.0;
 	fovy = 45.0;
-	aspect = 16.0/9.0;
+	aspect = 16.0/9.0;  //16 : 9分辨率
 	scale = 1.5;
 	zNear = 0.01;
 	zFar = 100.0;
+	eye = glm::vec4(0.0, 0.0, radius, 1.0);
+	at = glm::vec4(0.0, 0.0, 0.0, 1.0);
+	up = glm::vec4(0.0, 1.0, 0.0, 0.0);
+	front = at - eye;
+	pitch = 0.0f, yaw = -90.0f;
+	lastX = 800.0f, lastY = 450.0f;
+	sensitivity = 0.02;
+	cameraSpeed = 0.0005;
+	firstMouse = true;
 }
 
-void Camera::keyboard(int key, int action, int mode)
+void Camera::keyboard(GLFWwindow* window)
 {
 	// 键盘事件处理
-	// 通过按键改变相机和投影的参数
-	if (key == GLFW_KEY_U && mode == 0x0000) {
-		rotateAngle += 5.0;
-		if (rotateAngle > 180)
-			rotateAngle = rotateAngle - 360;
+	// WASD控制相机移动
+	int W = glfwGetKey(window, GLFW_KEY_W), S = glfwGetKey(window, GLFW_KEY_S);
+	int A = glfwGetKey(window, GLFW_KEY_A), D = glfwGetKey(window, GLFW_KEY_D);
+	int SPACE = glfwGetKey(window, GLFW_KEY_SPACE);
+	if (W == GLFW_PRESS || W == GLFW_REPEAT)
+	{
+		eye += cameraSpeed * front;
 	}
-	else if (key == GLFW_KEY_U && mode == GLFW_MOD_SHIFT) {
-		rotateAngle -= 5.0;
-		if (rotateAngle < -180)
-			rotateAngle = rotateAngle + 360;
+	else if (S == GLFW_PRESS || S == GLFW_REPEAT)
+	{
+		eye -= cameraSpeed * front;
 	}
-	else if (key == GLFW_KEY_I && mode == 0x0000) {
-		upAngle += 5.0;
-		if (upAngle >= 180)
-			upAngle = upAngle - 360;
+	else if (A == GLFW_PRESS || A == GLFW_REPEAT)
+	{
+		glm::vec3 ftmp = front;
+		glm::vec3 utmp = up;
+		glm::vec4 delta = glm::vec4(cameraSpeed * glm::normalize(glm::cross(ftmp, utmp)), 1.0);
+		eye -= delta;
 	}
-	else if (key == GLFW_KEY_I && mode == GLFW_MOD_SHIFT) {
-		upAngle -= 5.0;
-		if (upAngle <= -180)
-			upAngle = upAngle + 360;
-	}
-	else if (key == GLFW_KEY_O && mode == 0x0000) {
-		radius += 0.1;
-	}
-	else if (key == GLFW_KEY_O && mode == GLFW_MOD_SHIFT) {
-		radius -= 0.1;
+	else if (D == GLFW_PRESS || D == GLFW_REPEAT)
+	{
+		glm::vec3 ftmp = front;
+		glm::vec3 utmp = up;
+		glm::vec4 delta = glm::vec4(cameraSpeed * glm::normalize(glm::cross(ftmp, utmp)), 1.0);
+		eye += delta;
 	}
 	// 空格键初始化所有参数
-	else if (key == GLFW_KEY_SPACE && mode == 0x0000){
+	else if (SPACE == GLFW_PRESS) {
 		initCamera();
 	}
-	
+}
+
+void Camera::mouse(double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
 }
