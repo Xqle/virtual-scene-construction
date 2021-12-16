@@ -577,17 +577,7 @@ void TriMesh::readObj(const std::string& filename)
 
 	cleanData();
 
-	// @TODO: 读取obj文件，记录里面的这些数据
-	// vertex_positions
-	// vertex_normals
-	// vertex_textures		
-
-	// faces
-	// normal_index
-	// texture_index
-
-	// 其中vertex_color和color_index可以用法向量的数值赋值
-		
+	int face_cnt = 0;
 	while (std::getline(fin, line))
 	{
 		std::istringstream sin(line);
@@ -598,7 +588,42 @@ void TriMesh::readObj(const std::string& filename)
 		int a2, b2, c2;
 		char slash;
 
-		// xxxxxxx
+		// @TODO: Task2 读取obj文件，记录里面的这些数据，可以参考readOff的写法
+		sin >> type;
+		// vertex_positions
+		if (type != "f")
+		{
+			sin >> _x >> _y >> _z;
+			glm::vec3 node(_x, _y, _z);
+			if (type == "v") vertex_positions.push_back(node);
+			// vertex_normals
+			else if (type == "vn")
+			{
+				vertex_normals.push_back(node);
+				vertex_colors.push_back(node);
+			}
+			// vertex_textures	
+			else if (type == "vt") vertex_textures.push_back(glm::vec2{ node.x, node.y });
+		}
+		// faces
+		// texture_index
+		// normal_index
+		else
+		{
+			sin >> a0 >> slash >> b0 >> slash >> c0;
+			sin >> a1 >> slash >> b1 >> slash >> c1;
+			sin >> a2 >> slash >> b2 >> slash >> c2;
+			a0--, a1--, a2--;
+			b0--, b1--, b2--;
+			c0--, c1--, c2--;
+
+			faces.push_back(vec3i{ a0, a1, a2 });
+			texture_index.push_back(vec3i{ b0, b1, b2 });
+			normal_index.push_back(vec3i{ c0, c1, c2 });
+			color_index.push_back(vec3i{ c0, c1, c2 });
+		}
+
+		// 其中vertex_color和color_index可以用法向量的数值赋值
 
 	}
 
