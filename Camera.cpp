@@ -9,7 +9,7 @@ Camera::~Camera() {}
 
 glm::mat4 Camera::getViewMatrix()
 {
-	return this->lookAt(eye, front, up);
+	return this->lookAt(eye, eye + front, up);
 }
 
 glm::mat4 Camera::getProjectionMatrix(bool isOrtho)
@@ -112,7 +112,7 @@ void Camera::initCamera(){
 	scale = 1.5;
 	zNear = 0.01;
 	zFar = 100.0;
-	eye = glm::vec4(0.0, 0.0, radius, 1.0);
+	eye = glm::vec4(0.0, 0.3, radius, 1.0);
 	at = glm::vec4(0.0, 0.0, 0.0, 1.0);
 	up = glm::vec4(0.0, 1.0, 0.0, 0.0);
 	front = at - eye;

@@ -23,7 +23,8 @@ int HEIGHT = 600;
 int mainWindow;
 
 TriMesh* cube = new TriMesh();
-TriMesh* monu9 = new TriMesh();
+TriMesh* chr_sword = new TriMesh();
+TriMesh* land = new TriMesh();
 
 Camera* camera = new Camera();
 Light* light = new Light();
@@ -64,7 +65,7 @@ void base(glm::mat4 modelView)
 	instance = glm::scale(instance, glm::vec3(BASE_WIDTH, BASE_HEIGHT, BASE_WIDTH));
 
 	// 绘制，由于我们只有一个立方体数据，所以这里可以直接指定绘制painter中存储的第0个立方体
-	painter->drawMesh(0, modelView * instance, light, camera);
+	painter->drawMesh(0, modelView * instance, light, camera, 1);
 	
 }
 
@@ -77,7 +78,7 @@ void upper_arm(glm::mat4 modelView)
 	instance = glm::translate(instance, glm::vec3(0.0, (BASE_HEIGHT + UPPER_ARM_HEIGHT) / 2, 0.0));
 	instance = glm::scale(instance, glm::vec3(UPPER_ARM_WIDTH, UPPER_ARM_HEIGHT, UPPER_ARM_WIDTH));
 	// 绘制，由于我们只有一个立方体数据，所以这里可以直接指定绘制painter中存储的第0个立方体
-	painter->drawMesh(0, modelView * instance, light, camera);
+	painter->drawMesh(0, modelView * instance, light, camera, 1);
 
 }
 
@@ -90,12 +91,12 @@ void lower_arm(glm::mat4 modelView)
 	instance = glm::scale(instance, glm::vec3(LOWER_ARM_WIDTH, LOWER_ARM_HEIGHT, LOWER_ARM_WIDTH));
 
 	// 绘制，由于我们只有一个立方体数据，所以这里可以直接指定绘制painter中存储的第0个立方体
-	painter->drawMesh(0, modelView * instance, light, camera);
+	painter->drawMesh(0, modelView * instance, light, camera, 1);
 }
 
 void drawMonu9(glm::mat4 modelView)
 {
-	painter->drawMesh(1, modelView, light, camera);
+	painter->drawMesh(1, modelView, light, camera, 1);
 }
 void init()
 {
@@ -122,18 +123,31 @@ void init()
 	// 指定纹理与着色器，因为不用纹理图片所以就传个空字符串进去了
 	painter->addMesh(cube, "Cube", "", vshader, cfshader);
 	meshList.push_back(cube);
+
+	//草地
+	land->setNormalize(false);
+	land->generateSquare(glm::vec3(0.78f, 0.5f, 0.4f));
+	land->setTranslation(glm::vec3(0.0, -0.001, 0.0));    //加点偏移，不要跟阴影重合
+	land->setRotation(glm::vec3(90.0, 0.0, 0.0));
+	land->setScale(glm::vec3(50, 50, 50));
+	land->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 环境光
+	land->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
+	land->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
+	land->setShininess(1.0); //高光系数
+	painter->addMesh(land, "land", "assets/grass3.jpg", vshader, tfshader);
+
 	
-	monu9->setNormalize(false);
-	monu9->readObj("assets/monu9/monu9.obj"); 
-	monu9->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	monu9->setRotation(glm::vec3(0.0, 0.0, 0.0));
-	monu9->setScale(glm::vec3(0.3, 0.3, 0.3));
-	monu9->setAmbient(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 环境光
-	monu9->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
-	monu9->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
-	monu9->setShininess(1.0); //高光系数
-	painter->addMesh(monu9, "monu9", "assets/monu9/monu9.png", vshader, tfshader);
-	meshList.push_back(monu9);
+	chr_sword->setNormalize(false);
+	chr_sword->readObj("assets/chr_sword/chr_sword.obj");
+	chr_sword->setTranslation(glm::vec3(0.0, 0.0, 0.0));
+	chr_sword->setScale(glm::vec3(1, 1, 1));
+	chr_sword->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // 环境光
+	chr_sword->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
+	chr_sword->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
+	chr_sword->setShininess(1.0); //高光系数
+	painter->addMesh(chr_sword, "chr_sword", "assets/chr_sword/chr_sword.png", vshader, tfshader);
+	meshList.push_back(chr_sword);
+
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
@@ -161,9 +175,11 @@ void display()
 	//// 绘制小臂	
 	//lower_arm(modelView);
 
-	glm::mat4 modelView = monu9->getModelMatrix();
-	modelView = glm::translate(modelView, glm::vec3(-4, -8, 2));
-	drawMonu9(modelView);
+	glm::mat4 modelView = land->getModelMatrix();
+	painter->drawMesh(1, modelView, light, camera, 0);
+
+	modelView = chr_sword->getModelMatrix();
+	painter->drawMesh(2, modelView, light, camera, 1);
 }
 
 

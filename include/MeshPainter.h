@@ -67,8 +67,8 @@ public:
     void addMesh( TriMesh* mesh, const std::string &name, const std::string &texture_image, const std::string &vshader, const std::string &fshader );
 
 	// 绘制物体
-    void drawMesh(TriMesh* mesh, openGLObject &object, Light *light, Camera* camera);
-	void drawMesh(int i, glm::mat4 modelMatrix, Light *light, Camera* camera);
+    void drawMesh(TriMesh* mesh, openGLObject &object, Light *light, Camera* camera, bool need_shadow);
+	void drawMesh(int i, glm::mat4 modelMatrix, Light *light, Camera* camera, bool need_shadow);
 
 	// 绘制多个物体
     void drawMeshes(Light *light, Camera* camera);

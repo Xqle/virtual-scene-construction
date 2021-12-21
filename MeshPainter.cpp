@@ -139,7 +139,7 @@ void MeshPainter::addMesh( TriMesh* mesh, const std::string &name, const std::st
     opengl_objects.push_back(object);
 };
 
-void MeshPainter::drawMesh(TriMesh* mesh, openGLObject &object, Light *light, Camera* camera){
+void MeshPainter::drawMesh(TriMesh* mesh, openGLObject &object, Light *light, Camera* camera, bool need_shadow){
     
     // 相机矩阵计算
 	camera->updateCamera();
@@ -178,7 +178,7 @@ void MeshPainter::drawMesh(TriMesh* mesh, openGLObject &object, Light *light, Ca
 };
 
 
-void MeshPainter::drawMesh(int i, glm::mat4 modelMatrix, Light *light, Camera* camera){
+void MeshPainter::drawMesh(int i, glm::mat4 modelMatrix, Light *light, Camera* camera, bool need_shadow){
     
 	openGLObject &object = opengl_objects[i];
 	TriMesh* mesh = meshes[i];
@@ -208,7 +208,15 @@ void MeshPainter::drawMesh(int i, glm::mat4 modelMatrix, Light *light, Camera* c
 	// 绘制
 	// drawMesh(meshes[i], opengl_objects[i], light, camera);
 
-	glDrawArrays(GL_TRIANGLES, 0,  meshes[i]->getPoints().size());
+	glDrawArrays(GL_TRIANGLES, 0, mesh->getPoints().size());
+
+	if (need_shadow)
+	{
+		modelMatrix = light->getShadowProjectionMatrix() * modelMatrix;
+		glUniformMatrix4fv(object.modelLocation, 1, GL_FALSE, &modelMatrix[0][0]);
+		glUniform1i(object.shadowLocation, 1);
+		glDrawArrays(GL_TRIANGLES, 0, mesh->getPoints().size());
+	}
 
 
 	glBindVertexArray(0);
@@ -219,7 +227,7 @@ void MeshPainter::drawMesh(int i, glm::mat4 modelMatrix, Light *light, Camera* c
 void MeshPainter::drawMeshes(Light *light, Camera* camera){
     for (int i = 0; i < meshes.size(); i++)
     {
-        drawMesh(meshes[i], opengl_objects[i], light, camera);
+        drawMesh(meshes[i], opengl_objects[i], light, camera, 1);
     }
 };
 

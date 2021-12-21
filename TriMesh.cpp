@@ -327,11 +327,11 @@ void TriMesh::generateSquare(glm::vec3 color)
 
 	// 顶点纹理坐标
 	vertex_textures.push_back(glm::vec2(0, 0));
-	vertex_textures.push_back(glm::vec2(1, 0));
-	vertex_textures.push_back(glm::vec2(1, 1));
+	vertex_textures.push_back(glm::vec2(100, 0));
+	vertex_textures.push_back(glm::vec2(100, 100));
 
-	vertex_textures.push_back(glm::vec2(1, 1));
-	vertex_textures.push_back(glm::vec2(0, 1));
+	vertex_textures.push_back(glm::vec2(100, 100));
+	vertex_textures.push_back(glm::vec2(0, 100));
 	vertex_textures.push_back(glm::vec2(0, 0));
 
 	texture_index.push_back(vec3i(0, 1, 2));
@@ -578,6 +578,7 @@ void TriMesh::readObj(const std::string& filename)
 	cleanData();
 
 	int face_cnt = 0;
+	float minY = 1e9;
 	while (std::getline(fin, line))
 	{
 		std::istringstream sin(line);
@@ -595,7 +596,7 @@ void TriMesh::readObj(const std::string& filename)
 		{
 			sin >> _x >> _y >> _z;
 			glm::vec3 node(_x, _y, _z);
-			if (type == "v") vertex_positions.push_back(node);
+			if (type == "v") vertex_positions.push_back(node), minY = std::min(minY, _y);
 			// vertex_normals
 			else if (type == "vn")
 			{
@@ -626,6 +627,8 @@ void TriMesh::readObj(const std::string& filename)
 		// 其中vertex_color和color_index可以用法向量的数值赋值
 
 	}
+
+	for (int i = 0; i < vertex_positions.size(); i ++)  vertex_positions[i].y -= minY;
 
 	storeFacesPoints();
 }
