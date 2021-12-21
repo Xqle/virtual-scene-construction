@@ -25,6 +25,8 @@ int mainWindow;
 TriMesh* cube = new TriMesh();
 TriMesh* chr_sword = new TriMesh();
 TriMesh* land = new TriMesh();
+TriMesh* LeftLowerLeg = new TriMesh();
+TriMesh* RightLowerLeg = new TriMesh();
 
 Camera* camera = new Camera();
 Light* light = new Light();
@@ -144,7 +146,7 @@ void init()
 	
 	chr_sword->setNormalize(true);
 	chr_sword->readObj("assets/chr_sword/chr_sword.obj");
-	chr_sword->setTranslation(glm::vec3(0.0, 0.0, 0.0));
+	chr_sword->setTranslation(glm::vec3(1.0, 0.0, 1.0));
 	Scale[2] = glm::vec3(1, 1, 1);
 	chr_sword->setScale(Scale[2]);
 	chr_sword->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // 环境光
@@ -154,6 +156,27 @@ void init()
 	painter->addMesh(chr_sword, "chr_sword", "assets/chr_sword/chr_sword.png", vshader, tfshader);
 	meshList.push_back(chr_sword);
 
+	LeftLowerLeg->setNormalize(true);
+	LeftLowerLeg->readObj("assets/Luffy/LeftLowerLeg.obj");
+	LeftLowerLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
+	LeftLowerLeg->setScale(glm::vec3(1, 1, 1));
+	LeftLowerLeg->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // 环境光
+	LeftLowerLeg->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
+	LeftLowerLeg->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
+	LeftLowerLeg->setShininess(1.0); //高光系数
+	painter->addMesh(LeftLowerLeg, "LeftLowerLeg", "assets/Luffy/LeftLowerLeg.png", vshader, tfshader);
+	meshList.push_back(LeftLowerLeg);
+
+	RightLowerLeg->setNormalize(true);
+	RightLowerLeg->readObj("assets/Luffy/RightLowerLeg.obj");
+	RightLowerLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
+	RightLowerLeg->setScale(glm::vec3(1, 1, 1));
+	RightLowerLeg->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // 环境光
+	RightLowerLeg->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
+	RightLowerLeg->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
+	RightLowerLeg->setShininess(1.0); //高光系数
+	painter->addMesh(RightLowerLeg, "RightLowerLeg", "assets/Luffy/RightLowerLeg.png", vshader, tfshader);
+	meshList.push_back(RightLowerLeg);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
@@ -191,6 +214,12 @@ void display()
 	modelView = chr_sword->getModelMatrix();
 	modelView = glm::rotate(modelView, glm::radians(myTheta[2]), glm::vec3(0.0, 1.0, 0.0));
 	painter->drawMesh(3, modelView, light, camera, 1);
+
+	modelView = LeftLowerLeg->getModelMatrix();
+	painter->drawMesh(4, modelView, light, camera, 1);
+
+	modelView = glm::translate(modelView, glm::vec3(1.0, 0.0, 0.0));
+	painter->drawMesh(5, modelView, light, camera, 1);
 }
 
 
