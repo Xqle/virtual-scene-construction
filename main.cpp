@@ -27,6 +27,11 @@ int mainWindow;
 TriMesh* cube = new TriMesh();
 TriMesh* chr_sword = new TriMesh();
 TriMesh* land = new TriMesh();
+
+// Luffy
+TriMesh* Body = new TriMesh();
+TriMesh* LeftUpperLeg = new TriMesh();
+TriMesh* RightUpperLeg = new TriMesh();
 TriMesh* LeftLowerLeg = new TriMesh();
 TriMesh* RightLowerLeg = new TriMesh();
 
@@ -37,6 +42,35 @@ MeshPainter *painter = new MeshPainter();
 // 这个用来回收和删除我们创建的物体对象
 std::vector<TriMesh *> meshList;
 
+
+// 矩阵栈
+class MatrixStack {
+	int		_index;
+	int		_size;
+	glm::mat4* _matrices;
+
+public:
+	MatrixStack(int numMatrices = 100) :_index(0), _size(numMatrices)
+	{
+		_matrices = new glm::mat4[numMatrices];
+	}
+
+	~MatrixStack()
+	{
+		delete[]_matrices;
+	}
+
+	void push(const glm::mat4& m) {
+		assert(_index + 1 < _size);
+		_matrices[_index++] = m;
+	}
+
+	glm::mat4& pop() {
+		assert(_index - 1 >= 0);
+		_index--;
+		return _matrices[_index];
+	}
+};
 
 // 关节角
 enum{
@@ -112,7 +146,7 @@ void init()
 	cfshader = "shaders/cfshader.glsl";
 	tfshader = "shaders/tfshader.glsl";
 
-	// 设置光源位置
+	// 设置光源位置  --  0
 	light->readObj("assets/Myobj/sun/sun.obj");
 	light->setTranslation(glm::vec3(5.0, 10.0, 10.0));
 	light->setScale(glm::vec3(1, 1, 1));
@@ -122,7 +156,7 @@ void init()
 	painter->addMesh(light, "light", "assets/Myobj/sun/sun.png", vshader, tfshader);
 	meshList.push_back(light);
 
-	//创建机器臂的基础立方体
+	//创建机器臂的基础立方体  --  1
 	cube->setNormalize(false);
 	cube->generateCube();
 	cube->setTranslation(glm::vec3(0.0, 0.0, 0.0));
@@ -133,7 +167,7 @@ void init()
 	painter->addMesh(cube, "Cube", "", vshader, cfshader);
 	meshList.push_back(cube);
 
-	//草地
+	//草地  --  2
 	land->setNormalize(false);
 	land->generateSquare(glm::vec3(0.78f, 0.5f, 0.4f));
 	land->setTranslation(glm::vec3(0.0, -0.001, 0.0));    //加点偏移，不要跟阴影重合
@@ -145,40 +179,57 @@ void init()
 	land->setShininess(1.0); //高光系数
 	painter->addMesh(land, "land", "assets/grass3.jpg", vshader, tfshader);
 
-	
+	// chr_sword  --  3
 	chr_sword->setNormalize(true);
 	chr_sword->readObj("assets/chr_sword/chr_sword.obj");
 	chr_sword->setTranslation(glm::vec3(1.0, 0.0, 1.0));
 	Scale[2] = glm::vec3(1, 1, 1);
 	chr_sword->setScale(Scale[2]);
-	chr_sword->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // 环境光
-	chr_sword->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
-	chr_sword->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
-	chr_sword->setShininess(1.0); //高光系数
 	painter->addMesh(chr_sword, "chr_sword", "assets/chr_sword/chr_sword.png", vshader, tfshader);
 	meshList.push_back(chr_sword);
 
-	LeftLowerLeg->setNormalize(true);
+	glm::vec3 LuffyScale = glm::vec3(0.015, 0.015, 0.015);
+	//body  --  4
+	Body->setNormalize(false);
+	Body->readObj("assets/Myobj/Luffy/Body.obj");
+	Body->setTranslation(glm::vec3(0.0, 0.0, 0.0));
+	Body->setScale(LuffyScale);
+	painter->addMesh(Body, "Body", "assets/Myobj/Luffy/Body.png", vshader, tfshader);
+	meshList.push_back(Body);
+
+	// LeftUpperLeg  --  5
+	LeftUpperLeg->setNormalize(false);
+	LeftUpperLeg->readObj("assets/Myobj/Luffy/LeftUpperLeg.obj");
+	LeftUpperLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
+	LeftUpperLeg->setScale(LuffyScale);
+	painter->addMesh(LeftUpperLeg, "LeftUpperLeg", "assets/Myobj/Luffy/LeftUpperLeg.png", vshader, tfshader);
+	meshList.push_back(LeftUpperLeg);
+
+	// RightUpperLeg  --  6
+	RightUpperLeg->setNormalize(false);
+	RightUpperLeg->readObj("assets/Myobj/Luffy/RightUpperLeg.obj");
+	RightUpperLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
+	RightUpperLeg->setScale(LuffyScale);
+	painter->addMesh(RightUpperLeg, "RightUpperLeg", "assets/Myobj/Luffy/RightUpperLeg.png", vshader, tfshader);
+	meshList.push_back(RightUpperLeg);
+
+	// LeftLowerLeg  --  7
+	LeftLowerLeg->setNormalize(false);
 	LeftLowerLeg->readObj("assets/Myobj/Luffy/LeftLowerLeg.obj");
 	LeftLowerLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	LeftLowerLeg->setScale(glm::vec3(1, 1, 1));
-	LeftLowerLeg->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // 环境光
-	LeftLowerLeg->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
-	LeftLowerLeg->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
-	LeftLowerLeg->setShininess(1.0); //高光系数
+	LeftLowerLeg->setScale(LuffyScale);
 	painter->addMesh(LeftLowerLeg, "LeftLowerLeg", "assets/Myobj/Luffy/LeftLowerLeg.png", vshader, tfshader);
 	meshList.push_back(LeftLowerLeg);
 
-	RightLowerLeg->setNormalize(true);
+	// RightLowerLeg  --  8
+	RightLowerLeg->setNormalize(false);
 	RightLowerLeg->readObj("assets/Myobj/Luffy/RightLowerLeg.obj");
 	RightLowerLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	RightLowerLeg->setScale(glm::vec3(1, 1, 1));
-	RightLowerLeg->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // 环境光
-	RightLowerLeg->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
-	RightLowerLeg->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
-	RightLowerLeg->setShininess(1.0); //高光系数
+	RightLowerLeg->setScale(LuffyScale);
 	painter->addMesh(RightLowerLeg, "RightLowerLeg", "assets/Myobj/Luffy/RightLowerLeg.png", vshader, tfshader);
 	meshList.push_back(RightLowerLeg);
+
+
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
@@ -206,6 +257,7 @@ void display()
 	//// 绘制小臂	
 	//lower_arm(modelView);
 
+	
 	modelView = light->getModelMatrix();
 	painter->drawMesh(0, modelView, light, camera, 0);
 
@@ -217,11 +269,29 @@ void display()
 	modelView = glm::rotate(modelView, glm::radians(myTheta[2]), glm::vec3(0.0, 1.0, 0.0));
 	painter->drawMesh(3, modelView, light, camera, 1);
 
-	modelView = LeftLowerLeg->getModelMatrix();
+	MatrixStack mstack;
+	modelView = Body->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerLeg->getHeight() + LeftUpperLeg->getHeight(), 0.0));
 	painter->drawMesh(4, modelView, light, camera, 1);
 
-	modelView = glm::translate(modelView, glm::vec3(1.0, 0.0, 0.0));
+	//画左大腿和左小腿
+	mstack.push(modelView);
+	modelView = glm::translate(modelView, glm::vec3(Body->getLength() * 4.97f / 18.0f, -LeftUpperLeg->getHeight(), 0.0));
+	modelView = glm::rotate(modelView, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
 	painter->drawMesh(5, modelView, light, camera, 1);
+
+	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftLowerLeg->getHeight(), 0.0));
+	painter->drawMesh(7, modelView, light, camera, 1);
+
+	//画右大腿和右小腿
+	modelView = mstack.pop();
+	mstack.push(modelView);
+	modelView = glm::translate(modelView, glm::vec3(- Body->getLength() * 5.36f / 18.0f, -RightUpperLeg->getHeight(), 0.0));
+	modelView = glm::rotate(modelView, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
+	painter->drawMesh(6, modelView, light, camera, 1);
+
+	modelView = glm::translate(modelView, glm::vec3(0.0, -RightLowerLeg->getHeight(), 0.0));
+	painter->drawMesh(8, modelView, light, camera, 1);
 }
 
 

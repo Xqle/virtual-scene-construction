@@ -46,6 +46,10 @@ TriMesh::TriMesh()
 	scale = glm::vec3(1.0);
 	rotation = glm::vec3(0.0);
 	translation = glm::vec3(0.0);
+	ambient = glm::vec4(0.3, 0.3, 0.3, 1.0);
+	diffuse = glm::vec4(0.7, 0.7, 0.7, 1.0);
+	specular = glm::vec4(0.2, 0.2, 0.2, 1.0);
+	shininess = 1.0;
 }
 
 TriMesh::~TriMesh(){}
@@ -61,6 +65,9 @@ std::vector<glm::vec3> TriMesh::getColors(){ return colors; }
 std::vector<glm::vec3> TriMesh::getNormals(){ return normals;}
 std::vector<glm::vec2> TriMesh::getTextures(){ return textures; }
 
+float TriMesh::getLength() { return mesh_length; }
+float TriMesh::getWidth() { return mesh_width; }
+float TriMesh::getHeight() { return mesh_height; }
 
 void TriMesh::computeTriangleNormals()
 {
@@ -175,6 +182,10 @@ void TriMesh::storeFacesPoints()
 		if (position.y < min_y ) min_y = position.y;
 		if (position.z < min_z ) min_z = position.z;
 	}
+	this->mesh_length = max_x - min_x;
+	this->mesh_height = max_y - min_y;
+	this->mesh_width = max_z - min_z;
+
 	up_corner = glm::vec3(max_x, max_y, max_z);
 	down_corner = glm::vec3(min_x, min_y, min_z);
 	center = glm::vec3((min_x+max_x)/2.0, (min_y+max_y)/2.0, (min_z+max_z)/2.0);
@@ -183,12 +194,18 @@ void TriMesh::storeFacesPoints()
 
 	// 看是否归一化物体大小，是的话，这里将物体顶点缩放到对角线长度为1的包围盒内
 	if (do_normalize_size) {
-		float minY = 1e9;
+		float minX = 1e9, maxX = -1e9, minY = minX, maxY = maxX, maxZ = maxY, minZ = minY;
 		for (int i = 0; i < vertex_positions.size(); i++) {
 			vertex_positions[i] = (vertex_positions[i] - center) / diagonal_length;
 			minY = std::min(vertex_positions[i].y, minY);
+			maxY = std::max(vertex_positions[i].y, maxY);
+			minZ = std::min(vertex_positions[i].z, minZ);
+			maxZ = std::max(vertex_positions[i].z, maxZ);
 		}
 		for (int i = 0; i < vertex_positions.size(); i++) vertex_positions[i].y -= minY;
+		this->mesh_length = maxX - minX;
+		this->mesh_height = maxY - minY;
+		this->mesh_width = maxZ - minZ;
 	}
 
 	// 计算法向量
@@ -582,7 +599,7 @@ void TriMesh::readObj(const std::string& filename)
 	cleanData();
 
 	int face_cnt = 0;
-	float minY = 1e9, minX = 1e9, maxX = -1e9, minZ = minX, maxZ = maxX;
+	float minY = 1e9, maxY = -1e9, minX = 1e9, maxX = -1e9, minZ = minX, maxZ = maxX;
 	while (std::getline(fin, line))
 	{
 		std::istringstream sin(line);
@@ -604,6 +621,7 @@ void TriMesh::readObj(const std::string& filename)
 			{
 				vertex_positions.push_back(node);
 				minY = std::min(minY, _y);
+				maxY = std::max(maxY, _y);
 				minX = std::min(minX, _x);
 				maxX = std::max(maxX, _x);
 				minZ = std::min(minZ, _x);

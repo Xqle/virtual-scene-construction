@@ -65,6 +65,11 @@ public:
 	void updateTransform();
 
 
+	// 获取长宽高
+	float getLength();
+	float getHeight();
+	float getWidth();
+
 	// 设置物体材质
 	glm::vec4 getAmbient();
 	glm::vec4 getDiffuse();
@@ -129,6 +134,9 @@ protected:
 	glm::vec4 specular;				// 镜面反射
 	float shininess;			// 高光系数
 
+	float mesh_height;   //物体高度
+	float mesh_width;    //物体宽度
+	float mesh_length;   //物体长度
 };
 
 
