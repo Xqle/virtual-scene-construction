@@ -43,6 +43,8 @@ enum{
 };
 int     Axis = Base;
 GLfloat Theta[NumAngles] = {0.0};
+GLfloat myTheta[3] = { 0.0 };
+glm::vec3 Scale[3] = { glm::vec3(0.0, 0.0, 0.0) };
 
 // 菜单选项值
 const int Quit = 4;
@@ -107,11 +109,14 @@ void init()
 	tfshader = "shaders/tfshader.glsl";
 
 	// 设置光源位置
-	light->setTranslation(glm::vec3(0.0, 10.0, 2.0));
-	light->setScale(glm::vec3(0.05, 0.05, 0.05));
+	light->readObj("assets/sun/sun.obj");
+	light->setTranslation(glm::vec3(5.0, 10.0, 10.0));
+	light->setScale(glm::vec3(1, 1, 1));
 	light->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 环境光
 	light->setDiffuse(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 漫反射
 	light->setSpecular(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 镜面反射
+	painter->addMesh(light, "light", "assets/sun/sun.png", vshader, tfshader);
+	meshList.push_back(light);
 
 	//创建机器臂的基础立方体
 	cube->setNormalize(false);
@@ -137,10 +142,11 @@ void init()
 	painter->addMesh(land, "land", "assets/grass3.jpg", vshader, tfshader);
 
 	
-	chr_sword->setNormalize(false);
+	chr_sword->setNormalize(true);
 	chr_sword->readObj("assets/chr_sword/chr_sword.obj");
 	chr_sword->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	chr_sword->setScale(glm::vec3(1, 1, 1));
+	Scale[2] = glm::vec3(1, 1, 1);
+	chr_sword->setScale(Scale[2]);
 	chr_sword->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // 环境光
 	chr_sword->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
 	chr_sword->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
@@ -158,9 +164,9 @@ void display()
 // #endif
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//// 绘制底座 
-	//glm::mat4 modelView = glm::mat4(1.0);
-	//modelView = glm::translate(modelView, glm::vec3(0.0, -BASE_HEIGHT, 0.0));// 稍微下移一下，让机器人整体居中在原点
+	// 绘制底座 
+	glm::mat4 modelView = glm::mat4(1.0);
+	//modelView = glm::translate(modelView, glm::vec3(0.0, 0.0, 0.0));// 稍微下移一下，让机器人整体居中在原点
 	//modelView = glm::rotate(modelView, glm::radians(Theta[Base]), glm::vec3(0.0, 1.0, 0.0));// 底座旋转矩阵
 	//base(modelView); // 首先绘制底座
 
@@ -175,11 +181,16 @@ void display()
 	//// 绘制小臂	
 	//lower_arm(modelView);
 
-	glm::mat4 modelView = land->getModelMatrix();
-	painter->drawMesh(1, modelView, light, camera, 0);
+	modelView = light->getModelMatrix();
+	painter->drawMesh(0, modelView, light, camera, 0);
 
+	modelView = land->getModelMatrix();
+	painter->drawMesh(2, modelView, light, camera, 0);
+
+	chr_sword->setScale(Scale[2]);
 	modelView = chr_sword->getModelMatrix();
-	painter->drawMesh(2, modelView, light, camera, 1);
+	modelView = glm::rotate(modelView, glm::radians(myTheta[2]), glm::vec3(0.0, 1.0, 0.0));
+	painter->drawMesh(3, modelView, light, camera, 1);
 }
 
 
@@ -227,6 +238,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		switch (key)
 		{
 		case GLFW_KEY_ESCAPE: exit(EXIT_SUCCESS); break;
+		case GLFW_KEY_I:
+			myTheta[2] = myTheta[2] + 10.0;
+			while (myTheta[2] > 360) myTheta[2] -= 360;
+			break;
 		//case GLFW_KEY_Q: exit(EXIT_SUCCESS); break;
 		//case GLFW_KEY_1: Axis = Base; break;
 		//case GLFW_KEY_2: Axis = UpperArm; break;
@@ -242,13 +257,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		//	if (Theta[Axis] < 0.0)
 		//		Theta[Axis] += 360.0;
 		//	break;
-		default:
-			camera->keyboard(window);
-			break;
 		}
 	}
 }
 
+int asd = 0;
 void process_key_input(GLFWwindow *window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -297,7 +310,7 @@ int main(int argc, char **argv)
 #endif
 
 	// 配置窗口属性
-	GLFWwindow* window = glfwCreateWindow(1600, 900, "2019152051_Xuqile_Robot-1", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1600, 900, "2019152051_许琪乐_期末大作业", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -305,7 +318,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-	//glfwSetKeyCallback(window, key_callback);
+	glfwSetKeyCallback(window, key_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	//鼠标
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

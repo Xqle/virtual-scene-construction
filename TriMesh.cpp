@@ -182,9 +182,12 @@ void TriMesh::storeFacesPoints()
 
 	// 看是否归一化物体大小，是的话，这里将物体顶点缩放到对角线长度为1的包围盒内
 	if (do_normalize_size) {
+		float minY = 1e9;
 		for (int i = 0; i < vertex_positions.size(); i++) {
 			vertex_positions[i] = (vertex_positions[i] - center) / diagonal_length;
+			minY = std::min(vertex_positions[i].y, minY);
 		}
+		for (int i = 0; i < vertex_positions.size(); i++) vertex_positions[i].y -= minY;
 	}
 
 	// 计算法向量
@@ -327,11 +330,11 @@ void TriMesh::generateSquare(glm::vec3 color)
 
 	// 顶点纹理坐标
 	vertex_textures.push_back(glm::vec2(0, 0));
-	vertex_textures.push_back(glm::vec2(100, 0));
-	vertex_textures.push_back(glm::vec2(100, 100));
+	vertex_textures.push_back(glm::vec2(50, 0));
+	vertex_textures.push_back(glm::vec2(50, 50));
 
-	vertex_textures.push_back(glm::vec2(100, 100));
-	vertex_textures.push_back(glm::vec2(0, 100));
+	vertex_textures.push_back(glm::vec2(50, 50));
+	vertex_textures.push_back(glm::vec2(0, 50));
 	vertex_textures.push_back(glm::vec2(0, 0));
 
 	texture_index.push_back(vec3i(0, 1, 2));
@@ -578,7 +581,7 @@ void TriMesh::readObj(const std::string& filename)
 	cleanData();
 
 	int face_cnt = 0;
-	float minY = 1e9;
+	float minY = 1e9, minX = 1e9, maxX = -1e9, minZ = minX, maxZ = maxX;
 	while (std::getline(fin, line))
 	{
 		std::istringstream sin(line);
@@ -596,7 +599,15 @@ void TriMesh::readObj(const std::string& filename)
 		{
 			sin >> _x >> _y >> _z;
 			glm::vec3 node(_x, _y, _z);
-			if (type == "v") vertex_positions.push_back(node), minY = std::min(minY, _y);
+			if (type == "v")
+			{
+				vertex_positions.push_back(node);
+				minY = std::min(minY, _y);
+				minX = std::min(minX, _x);
+				maxX = std::max(maxX, _x);
+				minZ = std::min(minZ, _x);
+				maxZ = std::max(maxZ, _x);
+			}
 			// vertex_normals
 			else if (type == "vn")
 			{
@@ -625,12 +636,12 @@ void TriMesh::readObj(const std::string& filename)
 		}
 
 		// 其中vertex_color和color_index可以用法向量的数值赋值
-
 	}
 
-	for (int i = 0; i < vertex_positions.size(); i ++)  vertex_positions[i].y -= minY;
+	for (int i = 0; i < vertex_positions.size(); i++) vertex_positions[i].y -= minY;
+	
 
-	storeFacesPoints();
+ 	storeFacesPoints();
 }
 
 
