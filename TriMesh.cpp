@@ -1,4 +1,5 @@
 ﻿#include "TriMesh.h"
+#include <algorithm>
 
 // 一些基础颜色
 const glm::vec3 basic_colors[8] = {

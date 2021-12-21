@@ -9,7 +9,7 @@ Camera::~Camera() {}
 
 glm::mat4 Camera::getViewMatrix()
 {
-	return this->lookAt(eye, eye + front, up);
+	return this->lookAt(eye, front, up);
 }
 
 glm::mat4 Camera::getProjectionMatrix(bool isOrtho)
@@ -22,7 +22,7 @@ glm::mat4 Camera::getProjectionMatrix(bool isOrtho)
 	}
 }
 
-glm::mat4 Camera::lookAt(const glm::vec4& eye, const glm::vec4& at, const glm::vec4& up)
+glm::mat4 Camera::lookAt(const glm::vec4& eye, const glm::vec4& front, const glm::vec4& up)
 {
 	// use glm.
 	glm::vec3 eye_3 = eye;

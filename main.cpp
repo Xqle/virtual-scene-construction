@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 
+#pragma execution_character_set("utf-8");
+
 #define White	glm::vec3(1.0, 1.0, 1.0)
 #define Yellow	glm::vec3(1.0, 1.0, 0.0)
 #define Green	glm::vec3(0.0, 1.0, 0.0)
@@ -32,11 +34,11 @@ Camera* camera = new Camera();
 Light* light = new Light();
 MeshPainter *painter = new MeshPainter();
 
-// è¿™ä¸ªç”¨æ¥å›æ”¶å’Œåˆ é™¤æˆ‘ä»¬åˆ›å»ºçš„ç‰©ä½“å¯¹è±¡
+// Õâ¸öÓÃÀ´»ØÊÕºÍÉ¾³ıÎÒÃÇ´´½¨µÄÎïÌå¶ÔÏó
 std::vector<TriMesh *> meshList;
 
 
-// å…³èŠ‚è§’
+// ¹Ø½Ú½Ç
 enum{
     Base      = 0,
     LowerArm  = 1,
@@ -48,11 +50,11 @@ GLfloat Theta[NumAngles] = {0.0};
 GLfloat myTheta[3] = { 0.0 };
 glm::vec3 Scale[3] = { glm::vec3(0.0, 0.0, 0.0) };
 
-// èœå•é€‰é¡¹å€¼
+// ²Ëµ¥Ñ¡ÏîÖµ
 const int Quit = 4;
 
 
-// å°ºå¯¸å‚æ•°
+// ³ß´ç²ÎÊı
 const GLfloat BASE_HEIGHT      = 0.2;
 const GLfloat BASE_WIDTH       = 0.5;
 const GLfloat UPPER_ARM_HEIGHT = 0.3;
@@ -60,41 +62,41 @@ const GLfloat UPPER_ARM_WIDTH  = 0.2;
 const GLfloat LOWER_ARM_HEIGHT = 0.4;
 const GLfloat LOWER_ARM_WIDTH  = 0.1;
 
-// ç»˜åˆ¶åº•åº§
+// »æÖÆµ××ù
 void base(glm::mat4 modelView)
 {
-    // æŒ‰é•¿å®½é«˜ç¼©æ”¾æ­£æ–¹ä½“ï¼Œå¹³ç§»è‡³åˆé€‚ä½ç½®
+    // °´³¤¿í¸ßËõ·ÅÕı·½Ìå£¬Æ½ÒÆÖÁºÏÊÊÎ»ÖÃ
 	glm::mat4 instance = glm::mat4(1.0);
 	instance = glm::translate(instance, glm::vec3(0.0, BASE_HEIGHT / 2, 0.0));
 	instance = glm::scale(instance, glm::vec3(BASE_WIDTH, BASE_HEIGHT, BASE_WIDTH));
 
-	// ç»˜åˆ¶ï¼Œç”±äºæˆ‘ä»¬åªæœ‰ä¸€ä¸ªç«‹æ–¹ä½“æ•°æ®ï¼Œæ‰€ä»¥è¿™é‡Œå¯ä»¥ç›´æ¥æŒ‡å®šç»˜åˆ¶painterä¸­å­˜å‚¨çš„ç¬¬0ä¸ªç«‹æ–¹ä½“
+	// »æÖÆ£¬ÓÉÓÚÎÒÃÇÖ»ÓĞÒ»¸öÁ¢·½ÌåÊı¾İ£¬ËùÒÔÕâÀï¿ÉÒÔÖ±½ÓÖ¸¶¨»æÖÆpainterÖĞ´æ´¢µÄµÚ0¸öÁ¢·½Ìå
 	painter->drawMesh(0, modelView * instance, light, camera, 1);
 	
 }
 
 
-// ç»˜åˆ¶å¤§è‡‚
+// »æÖÆ´ó±Û
 void upper_arm(glm::mat4 modelView)
 {
-	// @TODO: å‚è€ƒåº•åº§çš„ç»˜åˆ¶ï¼Œåœ¨æ­¤æ·»åŠ ä»£ç ç»˜åˆ¶å¤§è‡‚
+	// @TODO: ²Î¿¼µ××ùµÄ»æÖÆ£¬ÔÚ´ËÌí¼Ó´úÂë»æÖÆ´ó±Û
 	glm::mat4 instance = glm::mat4(1.0);
 	instance = glm::translate(instance, glm::vec3(0.0, (BASE_HEIGHT + UPPER_ARM_HEIGHT) / 2, 0.0));
 	instance = glm::scale(instance, glm::vec3(UPPER_ARM_WIDTH, UPPER_ARM_HEIGHT, UPPER_ARM_WIDTH));
-	// ç»˜åˆ¶ï¼Œç”±äºæˆ‘ä»¬åªæœ‰ä¸€ä¸ªç«‹æ–¹ä½“æ•°æ®ï¼Œæ‰€ä»¥è¿™é‡Œå¯ä»¥ç›´æ¥æŒ‡å®šç»˜åˆ¶painterä¸­å­˜å‚¨çš„ç¬¬0ä¸ªç«‹æ–¹ä½“
+	// »æÖÆ£¬ÓÉÓÚÎÒÃÇÖ»ÓĞÒ»¸öÁ¢·½ÌåÊı¾İ£¬ËùÒÔÕâÀï¿ÉÒÔÖ±½ÓÖ¸¶¨»æÖÆpainterÖĞ´æ´¢µÄµÚ0¸öÁ¢·½Ìå
 	painter->drawMesh(0, modelView * instance, light, camera, 1);
 
 }
 
-// ç»˜åˆ¶å°è‡‚
+// »æÖÆĞ¡±Û
 void lower_arm(glm::mat4 modelView)
 {
-	// @TODO: å‚è€ƒåº•åº§çš„ç»˜åˆ¶ï¼Œåœ¨æ­¤æ·»åŠ ä»£ç ç»˜åˆ¶å°è‡‚
+	// @TODO: ²Î¿¼µ××ùµÄ»æÖÆ£¬ÔÚ´ËÌí¼Ó´úÂë»æÖÆĞ¡±Û
 	glm::mat4 instance = glm::mat4(1.0);
 	instance = glm::translate(instance, glm::vec3(0.0, (BASE_HEIGHT + UPPER_ARM_HEIGHT + LOWER_ARM_HEIGHT) / 2, 0.0));
 	instance = glm::scale(instance, glm::vec3(LOWER_ARM_WIDTH, LOWER_ARM_HEIGHT, LOWER_ARM_WIDTH));
 
-	// ç»˜åˆ¶ï¼Œç”±äºæˆ‘ä»¬åªæœ‰ä¸€ä¸ªç«‹æ–¹ä½“æ•°æ®ï¼Œæ‰€ä»¥è¿™é‡Œå¯ä»¥ç›´æ¥æŒ‡å®šç»˜åˆ¶painterä¸­å­˜å‚¨çš„ç¬¬0ä¸ªç«‹æ–¹ä½“
+	// »æÖÆ£¬ÓÉÓÚÎÒÃÇÖ»ÓĞÒ»¸öÁ¢·½ÌåÊı¾İ£¬ËùÒÔÕâÀï¿ÉÒÔÖ±½ÓÖ¸¶¨»æÖÆpainterÖĞ´æ´¢µÄµÚ0¸öÁ¢·½Ìå
 	painter->drawMesh(0, modelView * instance, light, camera, 1);
 }
 
@@ -105,42 +107,42 @@ void drawMonu9(glm::mat4 modelView)
 void init()
 {
 	std::string vshader, cfshader, tfshader;
-	// è¯»å–ç€è‰²å™¨å¹¶ä½¿ç”¨
+	// ¶ÁÈ¡×ÅÉ«Æ÷²¢Ê¹ÓÃ
 	vshader = "shaders/vshader.glsl";
 	cfshader = "shaders/cfshader.glsl";
 	tfshader = "shaders/tfshader.glsl";
 
-	// è®¾ç½®å…‰æºä½ç½®
-	light->readObj("assets/sun/sun.obj");
+	// ÉèÖÃ¹âÔ´Î»ÖÃ
+	light->readObj("assets/Myobj/sun/sun.obj");
 	light->setTranslation(glm::vec3(5.0, 10.0, 10.0));
 	light->setScale(glm::vec3(1, 1, 1));
-	light->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // ç¯å¢ƒå…‰
-	light->setDiffuse(glm::vec4(1.0, 1.0, 1.0, 1.0)); // æ¼«åå°„
-	light->setSpecular(glm::vec4(1.0, 1.0, 1.0, 1.0)); // é•œé¢åå°„
-	painter->addMesh(light, "light", "assets/sun/sun.png", vshader, tfshader);
+	light->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // »·¾³¹â
+	light->setDiffuse(glm::vec4(1.0, 1.0, 1.0, 1.0)); // Âş·´Éä
+	light->setSpecular(glm::vec4(1.0, 1.0, 1.0, 1.0)); // ¾µÃæ·´Éä
+	painter->addMesh(light, "light", "assets/Myobj/sun/sun.png", vshader, tfshader);
 	meshList.push_back(light);
 
-	//åˆ›å»ºæœºå™¨è‡‚çš„åŸºç¡€ç«‹æ–¹ä½“
+	//´´½¨»úÆ÷±ÛµÄ»ù´¡Á¢·½Ìå
 	cube->setNormalize(false);
 	cube->generateCube();
 	cube->setTranslation(glm::vec3(0.0, 0.0, 0.0));
 	cube->setRotation(glm::vec3(0.0, 0.0, 0.0));
 	cube->setScale(glm::vec3(1.0, 1.0, 1.0));
-	// åŠ åˆ°painterä¸­
-	// æŒ‡å®šçº¹ç†ä¸ç€è‰²å™¨ï¼Œå› ä¸ºä¸ç”¨çº¹ç†å›¾ç‰‡æ‰€ä»¥å°±ä¼ ä¸ªç©ºå­—ç¬¦ä¸²è¿›å»äº†
+	// ¼Óµ½painterÖĞ
+	// Ö¸¶¨ÎÆÀíÓë×ÅÉ«Æ÷£¬ÒòÎª²»ÓÃÎÆÀíÍ¼Æ¬ËùÒÔ¾Í´«¸ö¿Õ×Ö·û´®½øÈ¥ÁË
 	painter->addMesh(cube, "Cube", "", vshader, cfshader);
 	meshList.push_back(cube);
 
-	//è‰åœ°
+	//²İµØ
 	land->setNormalize(false);
 	land->generateSquare(glm::vec3(0.78f, 0.5f, 0.4f));
-	land->setTranslation(glm::vec3(0.0, -0.001, 0.0));    //åŠ ç‚¹åç§»ï¼Œä¸è¦è·Ÿé˜´å½±é‡åˆ
+	land->setTranslation(glm::vec3(0.0, -0.001, 0.0));    //¼ÓµãÆ«ÒÆ£¬²»Òª¸úÒõÓ°ÖØºÏ
 	land->setRotation(glm::vec3(90.0, 0.0, 0.0));
 	land->setScale(glm::vec3(50, 50, 50));
-	land->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // ç¯å¢ƒå…‰
-	land->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // æ¼«åå°„
-	land->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // é•œé¢åå°„
-	land->setShininess(1.0); //é«˜å…‰ç³»æ•°
+	land->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // »·¾³¹â
+	land->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // Âş·´Éä
+	land->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // ¾µÃæ·´Éä
+	land->setShininess(1.0); //¸ß¹âÏµÊı
 	painter->addMesh(land, "land", "assets/grass3.jpg", vshader, tfshader);
 
 	
@@ -149,59 +151,59 @@ void init()
 	chr_sword->setTranslation(glm::vec3(1.0, 0.0, 1.0));
 	Scale[2] = glm::vec3(1, 1, 1);
 	chr_sword->setScale(Scale[2]);
-	chr_sword->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // ç¯å¢ƒå…‰
-	chr_sword->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // æ¼«åå°„
-	chr_sword->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // é•œé¢åå°„
-	chr_sword->setShininess(1.0); //é«˜å…‰ç³»æ•°
+	chr_sword->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // »·¾³¹â
+	chr_sword->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // Âş·´Éä
+	chr_sword->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // ¾µÃæ·´Éä
+	chr_sword->setShininess(1.0); //¸ß¹âÏµÊı
 	painter->addMesh(chr_sword, "chr_sword", "assets/chr_sword/chr_sword.png", vshader, tfshader);
 	meshList.push_back(chr_sword);
 
 	LeftLowerLeg->setNormalize(true);
-	LeftLowerLeg->readObj("assets/Luffy/LeftLowerLeg.obj");
+	LeftLowerLeg->readObj("assets/Myobj/Luffy/LeftLowerLeg.obj");
 	LeftLowerLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
 	LeftLowerLeg->setScale(glm::vec3(1, 1, 1));
-	LeftLowerLeg->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // ç¯å¢ƒå…‰
-	LeftLowerLeg->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // æ¼«åå°„
-	LeftLowerLeg->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // é•œé¢åå°„
-	LeftLowerLeg->setShininess(1.0); //é«˜å…‰ç³»æ•°
-	painter->addMesh(LeftLowerLeg, "LeftLowerLeg", "assets/Luffy/LeftLowerLeg.png", vshader, tfshader);
+	LeftLowerLeg->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // »·¾³¹â
+	LeftLowerLeg->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // Âş·´Éä
+	LeftLowerLeg->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // ¾µÃæ·´Éä
+	LeftLowerLeg->setShininess(1.0); //¸ß¹âÏµÊı
+	painter->addMesh(LeftLowerLeg, "LeftLowerLeg", "assets/Myobj/Luffy/LeftLowerLeg.png", vshader, tfshader);
 	meshList.push_back(LeftLowerLeg);
 
 	RightLowerLeg->setNormalize(true);
-	RightLowerLeg->readObj("assets/Luffy/RightLowerLeg.obj");
+	RightLowerLeg->readObj("assets/Myobj/Luffy/RightLowerLeg.obj");
 	RightLowerLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
 	RightLowerLeg->setScale(glm::vec3(1, 1, 1));
-	RightLowerLeg->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // ç¯å¢ƒå…‰
-	RightLowerLeg->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // æ¼«åå°„
-	RightLowerLeg->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // é•œé¢åå°„
-	RightLowerLeg->setShininess(1.0); //é«˜å…‰ç³»æ•°
-	painter->addMesh(RightLowerLeg, "RightLowerLeg", "assets/Luffy/RightLowerLeg.png", vshader, tfshader);
+	RightLowerLeg->setAmbient(glm::vec4(0.3, 0.3, 0.3, 1.0)); // »·¾³¹â
+	RightLowerLeg->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // Âş·´Éä
+	RightLowerLeg->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // ¾µÃæ·´Éä
+	RightLowerLeg->setShininess(1.0); //¸ß¹âÏµÊı
+	painter->addMesh(RightLowerLeg, "RightLowerLeg", "assets/Myobj/Luffy/RightLowerLeg.png", vshader, tfshader);
 	meshList.push_back(RightLowerLeg);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
 void display()
 {
-// #ifdef __APPLE__ // è§£å†³ macOS 10.15 æ˜¾ç¤ºç”»é¢ç¼©å°é—®é¢˜
+// #ifdef __APPLE__ // ½â¾ö macOS 10.15 ÏÔÊ¾»­ÃæËõĞ¡ÎÊÌâ
 // 	glViewport(0, 0, WIDTH * 2, HEIGHT * 2);
 // #endif
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// ç»˜åˆ¶åº•åº§ 
+	// »æÖÆµ××ù 
 	glm::mat4 modelView = glm::mat4(1.0);
-	//modelView = glm::translate(modelView, glm::vec3(0.0, 0.0, 0.0));// ç¨å¾®ä¸‹ç§»ä¸€ä¸‹ï¼Œè®©æœºå™¨äººæ•´ä½“å±…ä¸­åœ¨åŸç‚¹
-	//modelView = glm::rotate(modelView, glm::radians(Theta[Base]), glm::vec3(0.0, 1.0, 0.0));// åº•åº§æ—‹è½¬çŸ©é˜µ
-	//base(modelView); // é¦–å…ˆç»˜åˆ¶åº•åº§
+	//modelView = glm::translate(modelView, glm::vec3(0.0, 0.0, 0.0));// ÉÔÎ¢ÏÂÒÆÒ»ÏÂ£¬ÈÃ»úÆ÷ÈËÕûÌå¾ÓÖĞÔÚÔ­µã
+	//modelView = glm::rotate(modelView, glm::radians(Theta[Base]), glm::vec3(0.0, 1.0, 0.0));// µ××ùĞı×ª¾ØÕó
+	//base(modelView); // Ê×ÏÈ»æÖÆµ××ù
 
- //   // @TODO: åœ¨æ­¤æ·»åŠ ä»£ç å®Œæˆæ•´ä¸ªæœºæ¢°æ‰‹è‡‚ç»˜åˆ¶
-	//// å¤§è‡‚å˜æ¢çŸ©é˜µ
-	//modelView = glm::rotate(modelView, glm::radians(Theta[UpperArm]), glm::vec3(0.0, 1.0, 0.0));// åº•åº§æ—‹è½¬çŸ©é˜µ
-	//// ç»˜åˆ¶å¤§è‡‚
+ //   // @TODO: ÔÚ´ËÌí¼Ó´úÂëÍê³ÉÕû¸ö»úĞµÊÖ±Û»æÖÆ
+	//// ´ó±Û±ä»»¾ØÕó
+	//modelView = glm::rotate(modelView, glm::radians(Theta[UpperArm]), glm::vec3(0.0, 1.0, 0.0));// µ××ùĞı×ª¾ØÕó
+	//// »æÖÆ´ó±Û
 	//upper_arm(modelView);
 
-	//// å°è‡‚å˜æ¢çŸ©é˜µ
-	//modelView = glm::rotate(modelView, glm::radians(Theta[LowerArm]), glm::vec3(0.0, 1.0, 0.0));// åº•åº§æ—‹è½¬çŸ©é˜µ
-	//// ç»˜åˆ¶å°è‡‚	
+	//// Ğ¡±Û±ä»»¾ØÕó
+	//modelView = glm::rotate(modelView, glm::radians(Theta[LowerArm]), glm::vec3(0.0, 1.0, 0.0));// µ××ùĞı×ª¾ØÕó
+	//// »æÖÆĞ¡±Û	
 	//lower_arm(modelView);
 
 	modelView = light->getModelMatrix();
@@ -258,7 +260,7 @@ void printHelp()
 }
 
 
-// é”®ç›˜å“åº”å‡½æ•°
+// ¼üÅÌÏìÓ¦º¯Êı
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	float tmp;
@@ -275,7 +277,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		//case GLFW_KEY_1: Axis = Base; break;
 		//case GLFW_KEY_2: Axis = UpperArm; break;
 		//case GLFW_KEY_3: Axis = LowerArm; break;
-		//// é€šè¿‡æŒ‰é”®æ—‹è½¬
+		//// Í¨¹ı°´¼üĞı×ª
 		//case GLFW_KEY_A: 
 		//	Theta[Axis] += 5.0;
 		//	if (Theta[Axis] > 360.0)
@@ -303,7 +305,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	camera->mouse(xpos, ypos);
 }
 void cleanData() {
-	// é‡Šæ”¾å†…å­˜
+	// ÊÍ·ÅÄÚ´æ
 	
 	delete camera;
 	camera = NULL;
@@ -326,10 +328,10 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 int main(int argc, char **argv)
 {
-	// åˆå§‹åŒ–GLFWåº“ï¼Œå¿…é¡»æ˜¯åº”ç”¨ç¨‹åºè°ƒç”¨çš„ç¬¬ä¸€ä¸ªGLFWå‡½æ•°
+	// ³õÊ¼»¯GLFW¿â£¬±ØĞëÊÇÓ¦ÓÃ³ÌĞòµ÷ÓÃµÄµÚÒ»¸öGLFWº¯Êı
 	glfwInit();
 
-	// é…ç½®GLFW
+	// ÅäÖÃGLFW
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -338,8 +340,8 @@ int main(int argc, char **argv)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-	// é…ç½®çª—å£å±æ€§
-	GLFWwindow* window = glfwCreateWindow(1600, 900, "2019152051_è®¸çªä¹_æœŸæœ«å¤§ä½œä¸š", NULL, NULL);
+	// ÅäÖÃ´°¿ÚÊôĞÔ
+	GLFWwindow* window = glfwCreateWindow(1600, 900, "2019152051_Ğíç÷ÀÖ_ÆÚÄ©´ó×÷Òµ", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -349,11 +351,11 @@ int main(int argc, char **argv)
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	//é¼ æ ‡
+	//Êó±ê
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
 
-	// è°ƒç”¨ä»»ä½•OpenGLçš„å‡½æ•°ä¹‹å‰åˆå§‹åŒ–GLAD
+	// µ÷ÓÃÈÎºÎOpenGLµÄº¯ÊıÖ®Ç°³õÊ¼»¯GLAD
 	// ---------------------------------------
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -363,22 +365,22 @@ int main(int argc, char **argv)
 
 	// Init mesh, shaders, buffer
 	init();
-	// è¾“å‡ºå¸®åŠ©ä¿¡æ¯
+	// Êä³ö°ïÖúĞÅÏ¢
 	printHelp();
-	// å¯ç”¨æ·±åº¦æµ‹è¯•
+	// ÆôÓÃÉî¶È²âÊÔ
 	glEnable(GL_DEPTH_TEST);
-	// å¯ç”¨æ··åˆ
+	// ÆôÓÃ»ìºÏ
 	glEnable(GL_BLEND);
 	while (!glfwWindowShouldClose(window))
 	{
-		//è®¡ç®—å½“å‰å¸§ä¸ä¸Šä¸€å¸§æ—¶é—´å·®
+		//¼ÆËãµ±Ç°Ö¡ÓëÉÏÒ»Ö¡Ê±¼ä²î
 		camera->caldeltaTime(glfwGetTime());
-		//æ¥å—é”®ç›˜è¾“å…¥
+		//½ÓÊÜ¼üÅÌÊäÈë
 		process_key_input(window);
 
 		display();
 
-		// äº¤æ¢é¢œè‰²ç¼“å†² ä»¥åŠ æ£€æŸ¥æœ‰æ²¡æœ‰è§¦å‘ä»€ä¹ˆäº‹ä»¶ï¼ˆæ¯”å¦‚é”®ç›˜è¾“å…¥ã€é¼ æ ‡ç§»åŠ¨ç­‰ï¼‰
+		// ½»»»ÑÕÉ«»º³å ÒÔ¼° ¼ì²éÓĞÃ»ÓĞ´¥·¢Ê²Ã´ÊÂ¼ş£¨±ÈÈç¼üÅÌÊäÈë¡¢Êó±êÒÆ¶¯µÈ£©
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -390,7 +392,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-// æ¯å½“çª—å£æ”¹å˜å¤§å°ï¼ŒGLFWä¼šè°ƒç”¨è¿™ä¸ªå‡½æ•°å¹¶å¡«å……ç›¸åº”çš„å‚æ•°ä¾›ä½ å¤„ç†ã€‚
+// Ã¿µ±´°¿Ú¸Ä±ä´óĞ¡£¬GLFW»áµ÷ÓÃÕâ¸öº¯Êı²¢Ìî³äÏàÓ¦µÄ²ÎÊı¹©Äã´¦Àí¡£
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
