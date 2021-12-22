@@ -40,6 +40,8 @@ TriMesh* RightUpperHand = new TriMesh();
 // 小臂
 TriMesh* LeftLowerHand = new TriMesh();
 TriMesh* RightLowerHand = new TriMesh();
+// 肉
+TriMesh* Meat = new TriMesh();
 // 大腿
 TriMesh* LeftUpperLeg = new TriMesh();
 TriMesh* RightUpperLeg = new TriMesh();
@@ -146,10 +148,6 @@ void lower_arm(glm::mat4 modelView)
 	painter->drawMesh(0, modelView * instance, light, camera, 1);
 }
 
-void drawMonu9(glm::mat4 modelView)
-{
-	painter->drawMesh(1, modelView, light, camera, 1);
-}
 void init()
 {
 	std::string vshader, cfshader, tfshader;
@@ -258,7 +256,15 @@ void init()
 	painter->addMesh(RightLowerHand, "RightLowerHand", "assets/Myobj/Luffy/RightLowerHand.png", vshader, tfshader);
 	meshList.push_back(RightLowerHand);
 
-	// LeftUpperLeg  --  11
+	// Meat  --  11
+	Meat->setNormalize(false);
+	Meat->readObj("assets/Myobj/Luffy/Meat.obj");
+	Meat->setTranslation(glm::vec3(0.0, 0.0, 0.0));
+	Meat->setScale(LuffyScale);
+	painter->addMesh(Meat, "Meat", "assets/Myobj/Luffy/Meat.png", vshader, tfshader);
+	meshList.push_back(Meat);
+
+	// LeftUpperLeg  --  12
 	LeftUpperLeg->setNormalize(false);
 	LeftUpperLeg->readObj("assets/Myobj/Luffy/LeftUpperLeg.obj");
 	LeftUpperLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
@@ -266,7 +272,7 @@ void init()
 	painter->addMesh(LeftUpperLeg, "LeftUpperLeg", "assets/Myobj/Luffy/LeftUpperLeg.png", vshader, tfshader);
 	meshList.push_back(LeftUpperLeg);
 
-	// RightUpperLeg  --  12
+	// RightUpperLeg  --  13
 	RightUpperLeg->setNormalize(false);
 	RightUpperLeg->readObj("assets/Myobj/Luffy/RightUpperLeg.obj");
 	RightUpperLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
@@ -274,7 +280,7 @@ void init()
 	painter->addMesh(RightUpperLeg, "RightUpperLeg", "assets/Myobj/Luffy/RightUpperLeg.png", vshader, tfshader);
 	meshList.push_back(RightUpperLeg);
 
-	// LeftLowerLeg  --  13
+	// LeftLowerLeg  --  14
 	LeftLowerLeg->setNormalize(false);
 	LeftLowerLeg->readObj("assets/Myobj/Luffy/LeftLowerLeg.obj");
 	LeftLowerLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
@@ -282,7 +288,7 @@ void init()
 	painter->addMesh(LeftLowerLeg, "LeftLowerLeg", "assets/Myobj/Luffy/LeftLowerLeg.png", vshader, tfshader);
 	meshList.push_back(LeftLowerLeg);
 
-	// RightLowerLeg  --  14
+	// RightLowerLeg  --  15
 	RightLowerLeg->setNormalize(false);
 	RightLowerLeg->readObj("assets/Myobj/Luffy/RightLowerLeg.obj");
 	RightLowerLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
@@ -294,6 +300,72 @@ void init()
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
+void drawLuffy()
+{
+	// **** 画身体 ****
+	MatrixStack mstack;
+	glm::mat4 modelView = Body->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerLeg->getHeight() + LeftUpperLeg->getHeight(), 0.0));
+	painter->drawMesh(6, modelView, light, camera, 1);
+
+	// **** 画头和帽子 ****
+	// 头
+	mstack.push(modelView);
+	modelView = glm::translate(modelView, glm::vec3(0.0, Body->getHeight(), 0.0));
+	painter->drawMesh(5, modelView, light, camera, 1);
+	// 帽子
+	modelView = glm::translate(modelView, glm::vec3(0.0, Head->getHeight(), 0.0));
+	painter->drawMesh(4, modelView, light, camera, 1);
+
+	// **** 画左大臂和左小臂和肉
+	// LeftUpperHand
+	modelView = mstack.pop();
+	mstack.push(modelView);
+	modelView = glm::translate(modelView, glm::vec3((Body->getLength() + LeftUpperHand->getLength()) / 2, Body->getHeight() / 2, 0.0));
+	painter->drawMesh(7, modelView, light, camera, 1);
+
+	// LeftLowerHand
+	modelView = glm::translate(modelView, glm::vec3(0.0, -Body->getHeight() * 9 / 20, 0.0));
+	painter->drawMesh(9, modelView, light, camera, 1);
+
+	// Meat
+	modelView = glm::translate(modelView, glm::vec3(LeftLowerHand->getLength() / 4, Meat->getWidth() / 8, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(80.0f), glm::vec3(1.0, 0.0, -0.3));
+	painter->drawMesh(11, modelView, light, camera, 1);
+
+	// **** 画右大臂和右小臂
+	// RightUpperHand
+	modelView = mstack.pop();
+	mstack.push(modelView);
+	modelView = glm::translate(modelView, glm::vec3(-(Body->getLength() + RightUpperHand->getLength()) * 41 / 80, Body->getHeight() / 2, 0.0));
+	painter->drawMesh(8, modelView, light, camera, 1);
+	// RightLowerHand
+	modelView = glm::translate(modelView, glm::vec3(0.0, -Body->getHeight() * 9 / 20, 0.0));
+	painter->drawMesh(10, modelView, light, camera, 1);
+
+	// **** 画左大腿和左小腿 **** 
+	// 左大腿
+	modelView = mstack.pop();
+	mstack.push(modelView);
+	modelView = glm::translate(modelView, glm::vec3(Body->getLength() * 4.97f / 18.0f, -LeftUpperLeg->getHeight(), 0.0));
+	modelView = glm::rotate(modelView, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
+	painter->drawMesh(12, modelView, light, camera, 1);
+	//左小腿
+	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftLowerLeg->getHeight(), 0.0));
+	painter->drawMesh(14, modelView, light, camera, 1);
+
+	// **** 画右大腿和右小腿 ****
+	// 右大腿
+	modelView = mstack.pop();
+	mstack.push(modelView);
+	modelView = glm::translate(modelView, glm::vec3(-Body->getLength() * 5.36f / 18.0f, -RightUpperLeg->getHeight(), 0.0));
+	modelView = glm::rotate(modelView, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
+	painter->drawMesh(13, modelView, light, camera, 1);
+	// 右小腿
+	modelView = glm::translate(modelView, glm::vec3(0.0, -RightLowerLeg->getHeight(), 0.0));
+	painter->drawMesh(15, modelView, light, camera, 1);
+}
+
 void display()
 {
 // #ifdef __APPLE__ // 解决 macOS 10.15 显示画面缩小问题
@@ -301,23 +373,7 @@ void display()
 // #endif
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// 绘制底座 
 	glm::mat4 modelView = glm::mat4(1.0);
-	//modelView = glm::translate(modelView, glm::vec3(0.0, 0.0, 0.0));// 稍微下移一下，让机器人整体居中在原点
-	//modelView = glm::rotate(modelView, glm::radians(Theta[Base]), glm::vec3(0.0, 1.0, 0.0));// 底座旋转矩阵
-	//base(modelView); // 首先绘制底座
-
- //   // @TODO: 在此添加代码完成整个机械手臂绘制
-	//// 大臂变换矩阵
-	//modelView = glm::rotate(modelView, glm::radians(Theta[UpperArm]), glm::vec3(0.0, 1.0, 0.0));// 底座旋转矩阵
-	//// 绘制大臂
-	//upper_arm(modelView);
-
-	//// 小臂变换矩阵
-	//modelView = glm::rotate(modelView, glm::radians(Theta[LowerArm]), glm::vec3(0.0, 1.0, 0.0));// 底座旋转矩阵
-	//// 绘制小臂	
-	//lower_arm(modelView);
-
 	
 	modelView = light->getModelMatrix();
 	painter->drawMesh(0, modelView, light, camera, 0);
@@ -330,65 +386,8 @@ void display()
 	modelView = glm::rotate(modelView, glm::radians(myTheta[2]), glm::vec3(0.0, 1.0, 0.0));
 	painter->drawMesh(3, modelView, light, camera, 1);
 
-	// **** 画身体 ****
-	MatrixStack mstack;
-	modelView = Body->getModelMatrix();
-	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerLeg->getHeight() + LeftUpperLeg->getHeight(), 0.0));
-	painter->drawMesh(6, modelView, light, camera, 1);
-
-	// **** 画头和帽子 ****
-	// 头
-	mstack.push(modelView);
-	modelView = glm::translate(modelView, glm::vec3(0.0, Body->getHeight(), 0.0));
-	painter->drawMesh(5, modelView, light, camera, 1);
-	// 帽子
-	modelView = glm::translate(modelView, glm::vec3(0.0, Head->getHeight(), 0.0));
-	painter->drawMesh(4, modelView, light, camera, 1);
-	
-	// **** 画左大臂和左小臂
-	// LeftUpperHand
-	modelView = mstack.pop();
-	mstack.push(modelView);
-	modelView = glm::translate(modelView, glm::vec3((Body->getLength() + LeftUpperHand->getLength()) / 2, Body->getHeight() / 2, 0.0));
-	painter->drawMesh(7, modelView, light, camera, 1);
-
-	// LeftLowerHand
-	modelView = glm::translate(modelView, glm::vec3(0.0, - Body->getHeight() * 9 / 20, 0.0));
-	painter->drawMesh(9, modelView, light, camera, 1);
-
-	// **** 画右大臂和右小臂
-	// RightUpperHand
-	modelView = mstack.pop();
-	mstack.push(modelView);
-	modelView = glm::translate(modelView, glm::vec3( - (Body->getLength() + RightUpperHand->getLength()) * 41 / 80, Body->getHeight() / 2, 0.0));
-	painter->drawMesh(8, modelView, light, camera, 1);
-	// RightLowerHand
-	modelView = glm::translate(modelView, glm::vec3(0.0, -Body->getHeight() * 9 / 20, 0.0));
-	painter->drawMesh(10, modelView, light, camera, 1);
-
-	// **** 画左大腿和左小腿 **** 
-	// 左大腿
-	modelView = mstack.pop();
-	mstack.push(modelView);
-	modelView = glm::translate(modelView, glm::vec3(Body->getLength() * 4.97f / 18.0f, -LeftUpperLeg->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
-	painter->drawMesh(11, modelView, light, camera, 1);
-	//左小腿
-	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftLowerLeg->getHeight(), 0.0));
-	painter->drawMesh(13, modelView, light, camera, 1);
-
-	// **** 画右大腿和右小腿 ****
-	// 右大腿
-	modelView = mstack.pop();
-	mstack.push(modelView);
-	modelView = glm::translate(modelView, glm::vec3(- Body->getLength() * 5.36f / 18.0f, -RightUpperLeg->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
-	painter->drawMesh(12, modelView, light, camera, 1);
-	// 右小腿
-	modelView = glm::translate(modelView, glm::vec3(0.0, -RightLowerLeg->getHeight(), 0.0));
-	painter->drawMesh(14, modelView, light, camera, 1);
+	drawLuffy();
 }
-
 
 void printHelp()
 {
