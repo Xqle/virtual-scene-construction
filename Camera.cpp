@@ -100,7 +100,7 @@ void Camera::caldeltaTime(float currentFrame)
 {
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
-	cameraSpeed = 2.0f * deltaTime;
+	cameraSpeed = 0.1f * deltaTime;
 }
 
 void Camera::initCamera(){
@@ -112,7 +112,7 @@ void Camera::initCamera(){
 	scale = 1.5;
 	zNear = 0.01;
 	zFar = 100.0;
-	eye = glm::vec4(0.0, 0.3, radius, 1.0);
+	eye = glm::vec4(0.0, 0.5, radius, 1.0);
 	at = glm::vec4(0.0, 0.0, 0.0, 1.0);
 	up = glm::vec4(0.0, 1.0, 0.0, 0.0);
 	front = at - eye;
