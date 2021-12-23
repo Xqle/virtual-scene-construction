@@ -60,6 +60,7 @@ public:
 	float yaw;
 	float lastX, lastY;
 	float sensitivity;
+	float cameraSpeedBase;
 	float cameraSpeed;
 	bool firstMouse;
 	// 渲染时间，用于平衡不同机器的移动速度

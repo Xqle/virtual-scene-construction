@@ -103,15 +103,15 @@ public:
 	}
 };
 
-float dir = -1.0, moveSpeed, rotateSpeed;
+float dir = -1.0, moveSpeedBase = 100.0f, moveSpeed, rotateSpeedBase = 100.0f, rotateSpeed;
 float lastFrame;
 //计算移动速度，旋转速度等
 void calMoveSpeed(float currentFrame)
 {
 	float deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
-	moveSpeed = 100.0f * deltaTime;
-	rotateSpeed = 100.00f * deltaTime;
+	moveSpeed = moveSpeedBase * deltaTime;
+	rotateSpeed = rotateSpeedBase * deltaTime;
 }
 
 void moveanimation()
@@ -210,7 +210,7 @@ void init()
 	land->generateSquare(glm::vec3(0.78f, 0.5f, 0.4f));
 	land->setTranslation(glm::vec3(0.0, -0.001, 0.0));    //加点偏移，不要跟阴影重合
 	land->setRotation(glm::vec3(90.0, 0.0, 0.0));
-	Scale[IndexMap["land"]] = glm::vec3(200.0, 200.0, 200.0);
+	Scale[IndexMap["land"]] = glm::vec3(50.0, 50.0, 50.0);
 	land->setScale(Scale[IndexMap["land"]]);
 	land->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 环境光
 	land->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
@@ -460,6 +460,7 @@ void drawLuffy()
 	modelView = glm::translate(modelView, glm::vec3(0.0, -RightLowerLeg->getHeight() + bias / 2, 0.0));
 	painter->drawMesh(IndexMap["RightLowerLeg"], modelView, light, camera, 1);
 }
+
 void drawAmbulance()
 {
 	MatrixStack mstack;
@@ -487,6 +488,7 @@ void drawAmbulance()
 	painter->drawMesh(IndexMap["AmbulanceBackWheels"], modelView, light, camera, 1);
 
 }
+
 void display()
 {
 // #ifdef __APPLE__ // 解决 macOS 10.15 显示画面缩小问题
@@ -515,34 +517,29 @@ void display()
 void printHelp()
 {
 	std::cout << "================================================" << std::endl;
-	std::cout << "Use mouse to controll the light position (drag)." << std::endl;
-	std::cout << "================================================" << std::endl << std::endl;
-	std::cout << "Use right click to open Menu." << std::endl;
+	std::cout << "Use mouse to controll the direction of camera." << std::endl;
 	std::cout << "================================================" << std::endl << std::endl;
 
 	std::cout << "Keyboard Usage" << std::endl;
 	std::cout <<
 		"[Window]" << std::endl <<
 		"ESC:		Exit" << std::endl <<
-		"h:		Print help message" << std::endl <<
-		std::endl <<
 
-		"[Part]" << std::endl <<
-		"1:		Base" << std::endl <<
-		"2:		LowerArm" << std::endl <<
-		"3:		UpperArm" << std::endl <<
-		std::endl <<
-
-		"[Model]" << std::endl <<
-		"a/A:	Increase rotate angle" << std::endl <<
-		"s/S:	Decrease rotate angle" << std::endl <<
+		"[Mesh]" << std::endl <<
+		"W:	Control the current mesh to move forward" << std::endl <<
+		"S:	Control the current mesh to move backward" << std::endl <<
+		"A:	Control the current mesh to turn left" << std::endl <<
+		"D:	Control the current mesh to turn right" << std::endl <<
+		"SPACE: Switch to the next mesh or the camera" << std::endl <<
+		"LEFT: To watch the mesh from the left of the mesh" <<
 
 		std::endl <<
 		"[Camera]" << std::endl <<
-		"SPACE:		Reset camera parameters" << std::endl <<
-		"u/U:		Increase/Decrease the rotate angle" << std::endl <<
-		"i/I:		Increase/Decrease the up angle" << std::endl <<
-		"o/O:		Increase/Decrease the camera radius" << std::endl << std::endl;
+		"W:	Control the camera to move forward" << std::endl <<
+		"S:	Control the camera to move backward" << std::endl <<
+		"A:	Control the camera to move left" << std::endl <<
+		"D:	Control the camera to move right" << std::endl <<
+		"SPACE: Switch to the next mesh" << std::endl;
 		
 }
 
@@ -587,10 +584,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		case GLFW_KEY_ESCAPE: 
 			KeyMap["ESCAPE"] = true; 
 			break;
-		case GLFW_KEY_M:
-			Theta[IndexMap["chr_sword"]] += 10.0;
-			if (Theta[IndexMap["chr_sword"]] > 360.0) Theta[IndexMap["chr_sword"]] -= 360.0;
-			break;
 		// WASD 改变方向
 		case GLFW_KEY_W:
 		case GLFW_KEY_S:
@@ -621,6 +614,26 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			if (action == GLFW_PRESS) KeyMap["LEFT"] = true;
 			else if (action == GLFW_RELEASE) KeyMap["LEFT"] = false;
 			break;
+		// 按 8 加速
+		case GLFW_KEY_8:
+			// 相机最高不过 8.0f，物体最高不过 200.0f；
+			if (CurMeshName == "camera") camera->cameraSpeedBase = std::min(camera->cameraSpeedBase + 0.5f, 8.0f);
+			else
+			{
+				moveSpeedBase = std::min(moveSpeedBase + 10.0f, 200.0f);
+				rotateSpeedBase = std::min(rotateSpeedBase + 10.0f, 200.0f);
+			}
+			break;
+		// 按 9 减速
+		case GLFW_KEY_9:
+			// 相机最低不下 1.0f，物体最低不下 50.0f
+			if (CurMeshName == "camera") camera->cameraSpeedBase = std::max(camera->cameraSpeedBase - 0.5f, 1.0f);
+			else
+			{
+				moveSpeedBase = std::max(moveSpeedBase - 10.0f, 50.0f);
+				rotateSpeedBase = std::max(rotateSpeedBase - 10.0f, 50.0f);
+			}
+			break;
 		}
 	}
 }
@@ -631,7 +644,7 @@ void process_key_input(GLFWwindow *window)
 	if (CurMeshName == "Body" && !KeyMap["W"] && !KeyMap["S"] && !KeyMap["A"] && !KeyMap["D"])
 	{
 		for (int i = IndexMap["Body"]; i < IndexMap["AmbulanceBody"]; i++)
-			if (i != IndexMap["Body"] && fabs(Theta[i]) > 0.01)
+			if (i != IndexMap["Body"] && fabs(Theta[i]) > 0.1)
 			{
 				float s = Theta[i] / fabs(Theta[i]);
 				Theta[i] -= 2 * s * rotateSpeed;
@@ -688,6 +701,11 @@ void process_key_input(GLFWwindow *window)
 			if (Theta[IndexMap[CurMeshName]] < 0.0f) Theta[IndexMap[CurMeshName]] += 360.0f;
 		}
 		// 记得保存T矩阵
+		// 空气墙
+		trans.x = std::min(25.0f, trans.x);
+		trans.x = std::max(-25.0f, trans.x);
+		trans.z = std::min(25.0f, trans.z);
+		trans.z = std::max(-25.0f, trans.z);
 		if (CurMeshName == "Body")
 			Body->setTranslation(trans);
 		else if (CurMeshName == "AmbulanceBody")
@@ -701,6 +719,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	camera->mouse(xpos, ypos);
 }
+
 void cleanData() {
 	// 释放内存
 	

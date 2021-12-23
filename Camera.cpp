@@ -1,5 +1,6 @@
 ﻿#include "Camera.h"
 #include <iostream>
+#include <algorithm>
 
 Camera::Camera() { 
 	initCamera();
@@ -99,7 +100,7 @@ void Camera::caldeltaTime(float currentFrame)
 {
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
-	cameraSpeed = 2.0f * deltaTime;
+	cameraSpeed = cameraSpeedBase * deltaTime;
 }
 
 void Camera::initCamera(){
@@ -117,6 +118,7 @@ void Camera::initCamera(){
 	pitch = 0.0f, yaw = -180.0f, upAngle = 0.0f;
 	lastX = 800.0f, lastY = 450.0f;
 	sensitivity = 0.02;
+	cameraSpeedBase = 4.0f;
 	cameraSpeed = 0.005;
 	firstMouse = true;
 }
@@ -150,6 +152,12 @@ void Camera::keyboard(GLFWwindow* window)
 		glm::vec4 delta = glm::vec4(cameraSpeed * glm::normalize(glm::cross(ftmp, utmp)), 1.0);
 		eye += delta;
 	}
+	//空气墙
+	eye.x = std::min(25.0f, eye.x); 
+	eye.x = std::max(-25.0f, eye.x);
+	eye.y = std::max(0.01f, eye.y);
+	eye.z = std::min(25.0f, eye.z); 
+	eye.z = std::max(-25.0f, eye.z);
 }
 
 void Camera::mouse(double xpos, double ypos)
