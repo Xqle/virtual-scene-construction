@@ -91,24 +91,45 @@ public:
 const int NumLuffyParts = 12;
 GLfloat LuffyTheta[12] = {0.0};
 std::map<std::string, int> LuffyMap;
-float dir = -1.0;
+float dir = -1.0, moveSpeed;
+float lastFrame;
+void calMoveSpeed(float currentFrame)
+{
+	float deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
+	moveSpeed = 100.0f * deltaTime;
+}
+
 void moveanimation()
 {
 	if (LuffyTheta[LuffyMap["LeftUpperHand"]] > 45.0 || LuffyTheta[LuffyMap["LeftUpperHand"]] < -45.0)
 	{
+		//控制摆动方向
 		dir = -dir;
-		if (dir < 0) 
+		//两个关键帧
+		if (dir < 0)
+		{
+			LuffyTheta[LuffyMap["LeftUpperHand"]] = 45.00f;
+			LuffyTheta[LuffyMap["RightUpperHand"]] = -45.00f;
 			LuffyTheta[LuffyMap["LeftLowerHand"]] = 0.0f;
+			LuffyTheta[LuffyMap["RightLowerHand"]] = -45.00f;
+		}
 		else
+		{
+			LuffyTheta[LuffyMap["LeftUpperHand"]] = -45.00f;
+			LuffyTheta[LuffyMap["RightUpperHand"]] = 45.00f;
+			LuffyTheta[LuffyMap["LeftLowerHand"]] = -45.00f;
 			LuffyTheta[LuffyMap["RightLowerHand"]] = 0.0f;
+		}
 	}
-	auto t = glfwGetTime();
-	LuffyTheta[LuffyMap["LeftUpperHand"]] += dir;
-	if(LuffyTheta[LuffyMap["LeftUpperHand"]] < 0) LuffyTheta[LuffyMap["LeftLowerHand"]] += dir;
-	LuffyTheta[LuffyMap["RightUpperHand"]] -= dir;
-	if (LuffyTheta[LuffyMap["RightUpperHand"]] < 0) LuffyTheta[LuffyMap["RightLowerHand"]] -= dir;
-	LuffyTheta[LuffyMap["RightUpperLeg"]] += dir;
-	LuffyTheta[LuffyMap["LeftUpperLeg"]] -= dir;
+	LuffyTheta[LuffyMap["LeftUpperHand"]] += dir * moveSpeed;
+	if(LuffyTheta[LuffyMap["LeftUpperHand"]] < 0) 
+		LuffyTheta[LuffyMap["LeftLowerHand"]] += dir * moveSpeed;
+	LuffyTheta[LuffyMap["RightUpperHand"]] -= dir * moveSpeed;
+	if (LuffyTheta[LuffyMap["RightUpperHand"]] < 0) 
+		LuffyTheta[LuffyMap["RightLowerHand"]] -= dir * moveSpeed;
+	LuffyTheta[LuffyMap["RightUpperLeg"]] += dir * moveSpeed;
+	LuffyTheta[LuffyMap["LeftUpperLeg"]] -= dir * moveSpeed;
 }	
 
 // 关节角
@@ -400,9 +421,8 @@ void drawLuffy()
 	modelView = glm::translate(modelView, glm::vec3(0.0, bias / 2, 0.0));
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3(Body->getLength() * 13.0f / 45.0f, -LeftUpperLeg->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftUpperLeg->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[LuffyMap["LeftUpperLeg"]]), glm::vec3(-1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[LuffyMap["LeftUpperLeg"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftUpperLeg->getHeight(), 0.0));
 	painter->drawMesh(12, modelView, light, camera, 1);
 	//左小腿
@@ -414,9 +434,8 @@ void drawLuffy()
 	modelView = mstack.pop();
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3(-Body->getLength() * 13.0f / 45.0f, -RightUpperLeg->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, RightUpperLeg->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[LuffyMap["RightUpperLeg"]]), glm::vec3(-1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[LuffyMap["RightUpperLeg"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -RightUpperLeg->getHeight(), 0.0));
 	painter->drawMesh(14, modelView, light, camera, 1);
 	// 右小腿
@@ -524,10 +543,10 @@ void process_key_input(GLFWwindow *window)
 	{
 		moveanimation();
 		glm::vec3 trans = Body->getTranslation();
-		if (UP == GLFW_PRESS) trans.z += 0.05;
-		else if (DOWN == GLFW_PRESS) trans.z -= 0.05;
-		else if (LEFT == GLFW_PRESS) trans.x += 0.05;
-		else if (RIGHT == GLFW_PRESS) trans.x -= 0.05;
+		if (UP == GLFW_PRESS) trans.z += 0.005 * moveSpeed;
+		else if (DOWN == GLFW_PRESS) trans.z -= 0.005 * moveSpeed;
+		else if (LEFT == GLFW_PRESS) trans.x += 0.005 * moveSpeed;
+		//else if (RIGHT == GLFW_PRESS) trans.x -= 0.005 * moveSpeed;
 		Body->setTranslation(trans);
 	}
 	else camera->keyboard(window);
@@ -607,7 +626,9 @@ int main(int argc, char **argv)
 	while (!glfwWindowShouldClose(window))
 	{
 		//计算当前帧与上一帧时间差
-		camera->caldeltaTime(glfwGetTime());
+		auto currentFrame = glfwGetTime();
+		camera->caldeltaTime(currentFrame);
+		calMoveSpeed(currentFrame);
 		//接受键盘输入
 		process_key_input(window);
 

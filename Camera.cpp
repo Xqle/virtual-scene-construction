@@ -100,7 +100,7 @@ void Camera::caldeltaTime(float currentFrame)
 {
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
-	cameraSpeed = 0.5f * deltaTime;
+	cameraSpeed = 2.0f * deltaTime;
 }
 
 void Camera::initCamera(){
