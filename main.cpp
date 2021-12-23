@@ -90,46 +90,50 @@ public:
 
 const int NumLuffyParts = 12;
 GLfloat LuffyTheta[12] = {0.0};
-std::map<std::string, int> LuffyMap;
-float dir = -1.0, moveSpeed;
+std::map<std::string, std::map<std::string, int>> AngleMap;
+float dir = -1.0, moveSpeed, rotateSpeed;
 float lastFrame;
+//计算移动速度，旋转速度等
 void calMoveSpeed(float currentFrame)
 {
 	float deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 	moveSpeed = 100.0f * deltaTime;
+	rotateSpeed = 50.00f * deltaTime;
 }
 
 void moveanimation()
 {
-	if (LuffyTheta[LuffyMap["LeftUpperHand"]] > 45.0 || LuffyTheta[LuffyMap["LeftUpperHand"]] < -45.0)
+	if (LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] > 45.0 || LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] < -45.0)
 	{
 		//控制摆动方向
 		dir = -dir;
 		//两个关键帧
 		if (dir < 0)
 		{
-			LuffyTheta[LuffyMap["LeftUpperHand"]] = 45.00f;
-			LuffyTheta[LuffyMap["RightUpperHand"]] = -45.00f;
-			LuffyTheta[LuffyMap["LeftLowerHand"]] = 0.0f;
-			LuffyTheta[LuffyMap["RightLowerHand"]] = -45.00f;
+			LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] = 45.00f;
+			LuffyTheta[AngleMap["Luffy"]["RightUpperHand"]] = -45.00f;
+			LuffyTheta[AngleMap["Luffy"]["LeftLowerHand"]] = 0.0f;
+			LuffyTheta[AngleMap["Luffy"]["RightLowerHand"]] = -45.00f;
 		}
 		else
 		{
-			LuffyTheta[LuffyMap["LeftUpperHand"]] = -45.00f;
-			LuffyTheta[LuffyMap["RightUpperHand"]] = 45.00f;
-			LuffyTheta[LuffyMap["LeftLowerHand"]] = -45.00f;
-			LuffyTheta[LuffyMap["RightLowerHand"]] = 0.0f;
+			LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] = -45.00f;
+			LuffyTheta[AngleMap["Luffy"]["RightUpperHand"]] = 45.00f;
+			LuffyTheta[AngleMap["Luffy"]["LeftLowerHand"]] = -45.00f;
+			LuffyTheta[AngleMap["Luffy"]["RightLowerHand"]] = 0.0f;
 		}
 	}
-	LuffyTheta[LuffyMap["LeftUpperHand"]] += dir * moveSpeed;
-	if(LuffyTheta[LuffyMap["LeftUpperHand"]] < 0) 
-		LuffyTheta[LuffyMap["LeftLowerHand"]] += dir * moveSpeed;
-	LuffyTheta[LuffyMap["RightUpperHand"]] -= dir * moveSpeed;
-	if (LuffyTheta[LuffyMap["RightUpperHand"]] < 0) 
-		LuffyTheta[LuffyMap["RightLowerHand"]] -= dir * moveSpeed;
-	LuffyTheta[LuffyMap["RightUpperLeg"]] += dir * moveSpeed;
-	LuffyTheta[LuffyMap["LeftUpperLeg"]] -= dir * moveSpeed;
+	LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] += dir * moveSpeed;
+	// 左大臂在身体前面的时候，左小臂才开摆
+	if(LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] < 0) 
+		LuffyTheta[AngleMap["Luffy"]["LeftLowerHand"]] += dir * moveSpeed;
+	LuffyTheta[AngleMap["Luffy"]["RightUpperHand"]] -= dir * moveSpeed;
+	// 右大臂在身体前面的时候，右小臂才开摆
+	if (LuffyTheta[AngleMap["Luffy"]["RightUpperHand"]] < 0) 
+		LuffyTheta[AngleMap["Luffy"]["RightLowerHand"]] -= dir * moveSpeed;
+	LuffyTheta[AngleMap["Luffy"]["RightUpperLeg"]] += dir * moveSpeed;
+	LuffyTheta[AngleMap["Luffy"]["LeftUpperLeg"]] -= dir * moveSpeed;
 }	
 
 // 关节角
@@ -155,43 +159,6 @@ const GLfloat UPPER_ARM_HEIGHT = 0.3;
 const GLfloat UPPER_ARM_WIDTH  = 0.2;
 const GLfloat LOWER_ARM_HEIGHT = 0.4;
 const GLfloat LOWER_ARM_WIDTH  = 0.1;
-
-// 绘制底座
-void base(glm::mat4 modelView)
-{
-    // 按长宽高缩放正方体，平移至合适位置
-	glm::mat4 instance = glm::mat4(1.0);
-	instance = glm::translate(instance, glm::vec3(0.0, BASE_HEIGHT / 2, 0.0));
-	instance = glm::scale(instance, glm::vec3(BASE_WIDTH, BASE_HEIGHT, BASE_WIDTH));
-
-	// 绘制，由于我们只有一个立方体数据，所以这里可以直接指定绘制painter中存储的第0个立方体
-	painter->drawMesh(0, modelView * instance, light, camera, 1);
-	
-}
-
-// 绘制大臂
-void upper_arm(glm::mat4 modelView)
-{
-	// @TODO: 参考底座的绘制，在此添加代码绘制大臂
-	glm::mat4 instance = glm::mat4(1.0);
-	instance = glm::translate(instance, glm::vec3(0.0, (BASE_HEIGHT + UPPER_ARM_HEIGHT) / 2, 0.0));
-	instance = glm::scale(instance, glm::vec3(UPPER_ARM_WIDTH, UPPER_ARM_HEIGHT, UPPER_ARM_WIDTH));
-	// 绘制，由于我们只有一个立方体数据，所以这里可以直接指定绘制painter中存储的第0个立方体
-	painter->drawMesh(0, modelView * instance, light, camera, 1);
-
-}
-
-// 绘制小臂
-void lower_arm(glm::mat4 modelView)
-{
-	// @TODO: 参考底座的绘制，在此添加代码绘制小臂
-	glm::mat4 instance = glm::mat4(1.0);
-	instance = glm::translate(instance, glm::vec3(0.0, (BASE_HEIGHT + UPPER_ARM_HEIGHT + LOWER_ARM_HEIGHT) / 2, 0.0));
-	instance = glm::scale(instance, glm::vec3(LOWER_ARM_WIDTH, LOWER_ARM_HEIGHT, LOWER_ARM_WIDTH));
-
-	// 绘制，由于我们只有一个立方体数据，所以这里可以直接指定绘制painter中存储的第0个立方体
-	painter->drawMesh(0, modelView * instance, light, camera, 1);
-}
 
 void init()
 {
@@ -252,7 +219,7 @@ void init()
 	Body->setScale(LuffyScale);
 	painter->addMesh(Body, "Body", "assets/Myobj/Luffy/Body.png", vshader, tfshader);
 	meshList.push_back(Body);
-	LuffyMap["Body"] = 0;
+	AngleMap["Luffy"]["Body"] = 0;
 
 	//Head  --  5
 	Head->setNormalize(false);
@@ -261,7 +228,7 @@ void init()
 	Head->setScale(LuffyScale);
 	painter->addMesh(Head, "Head", "assets/Myobj/Luffy/Head.png", vshader, tfshader);
 	meshList.push_back(Head);
-	LuffyMap["Head"] = 1;
+	AngleMap["Luffy"]["Head"] = 1;
 
 	//Hat  --  6
 	Hat->setNormalize(false);
@@ -270,7 +237,7 @@ void init()
 	Hat->setScale(LuffyScale);
 	painter->addMesh(Hat, "Hat", "assets/Myobj/Luffy/Hat.png", vshader, tfshader);
 	meshList.push_back(Hat);
-	LuffyMap["Hat"] = 2;
+	AngleMap["Luffy"]["Hat"] = 2;
 
 	// LeftUpperHand  --  7
 	LeftUpperHand->setNormalize(false);
@@ -279,7 +246,7 @@ void init()
 	LeftUpperHand->setScale(LuffyScale);
 	painter->addMesh(LeftUpperHand, "LeftUpperHand", "assets/Myobj/Luffy/LeftUpperHand.png", vshader, tfshader);
 	meshList.push_back(LeftUpperHand);
-	LuffyMap["LeftUpperHand"] = 3;
+	AngleMap["Luffy"]["LeftUpperHand"] = 3;
 
 	// LeftLowerHand  --  8
 	LeftLowerHand->setNormalize(false);
@@ -288,7 +255,7 @@ void init()
 	LeftLowerHand->setScale(LuffyScale);
 	painter->addMesh(LeftLowerHand, "LeftLowerHand", "assets/Myobj/Luffy/LeftLowerHand.png", vshader, tfshader);
 	meshList.push_back(LeftLowerHand);
-	LuffyMap["LeftLowerHand"] = 4;
+	AngleMap["Luffy"]["LeftLowerHand"] = 4;
 
 	// Meat  --  9
 	Meat->setNormalize(false);
@@ -297,7 +264,7 @@ void init()
 	Meat->setScale(LuffyScale);
 	painter->addMesh(Meat, "Meat", "assets/Myobj/Luffy/Meat.png", vshader, tfshader);
 	meshList.push_back(Meat);
-	LuffyMap["Meat"] = 5;
+	AngleMap["Luffy"]["Meat"] = 5;
 
 	// RightUpperHand  --  10
 	RightUpperHand->setNormalize(false);
@@ -306,7 +273,7 @@ void init()
 	RightUpperHand->setScale(LuffyScale);
 	painter->addMesh(RightUpperHand, "RightUpperHand", "assets/Myobj/Luffy/RightUpperHand.png", vshader, tfshader);
 	meshList.push_back(RightUpperHand);
-	LuffyMap["RightUpperHand"] = 6;
+	AngleMap["Luffy"]["RightUpperHand"] = 6;
 
 	// RightLowerHand  --  11
 	RightLowerHand->setNormalize(false);
@@ -315,7 +282,7 @@ void init()
 	RightLowerHand->setScale(LuffyScale);
 	painter->addMesh(RightLowerHand, "RightLowerHand", "assets/Myobj/Luffy/RightLowerHand.png", vshader, tfshader);
 	meshList.push_back(RightLowerHand);
-	LuffyMap["RightLowerHand"] = 7;
+	AngleMap["Luffy"]["RightLowerHand"] = 7;
 
 	// LeftUpperLeg  --  12
 	LeftUpperLeg->setNormalize(false);
@@ -324,7 +291,7 @@ void init()
 	LeftUpperLeg->setScale(LuffyScale);
 	painter->addMesh(LeftUpperLeg, "LeftUpperLeg", "assets/Myobj/Luffy/LeftUpperLeg.png", vshader, tfshader);
 	meshList.push_back(LeftUpperLeg);
-	LuffyMap["LeftUpperLeg"] = 8;
+	AngleMap["Luffy"]["LeftUpperLeg"] = 8;
 
 	// LeftLowerLeg  --  13
 	LeftLowerLeg->setNormalize(false);
@@ -333,7 +300,7 @@ void init()
 	LeftLowerLeg->setScale(LuffyScale);
 	painter->addMesh(LeftLowerLeg, "LeftLowerLeg", "assets/Myobj/Luffy/LeftLowerLeg.png", vshader, tfshader);
 	meshList.push_back(LeftLowerLeg);
-	LuffyMap["LeftLowerLeg"] = 9;
+	AngleMap["Luffy"]["LeftLowerLeg"] = 9;
 
 	// RightUpperLeg  --  14
 	RightUpperLeg->setNormalize(false);
@@ -342,7 +309,7 @@ void init()
 	RightUpperLeg->setScale(LuffyScale);
 	painter->addMesh(RightUpperLeg, "RightUpperLeg", "assets/Myobj/Luffy/RightUpperLeg.png", vshader, tfshader);
 	meshList.push_back(RightUpperLeg);
-	LuffyMap["RightUpperLeg"] = 10;
+	AngleMap["Luffy"]["RightUpperLeg"] = 10;
 
 	// RightLowerLeg  --  15
 	RightLowerLeg->setNormalize(false);
@@ -351,7 +318,7 @@ void init()
 	RightLowerLeg->setScale(LuffyScale);
 	painter->addMesh(RightLowerLeg, "RightLowerLeg", "assets/Myobj/Luffy/RightLowerLeg.png", vshader, tfshader);
 	meshList.push_back(RightLowerLeg);
-	LuffyMap["RightLowerLeg"] = 11;
+	AngleMap["Luffy"]["RightLowerLeg"] = 11;
 
 
 	glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -365,6 +332,7 @@ void drawLuffy()
 	MatrixStack mstack;
 	glm::mat4 modelView = Body->getModelMatrix();
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerLeg->getHeight() + LeftUpperLeg->getHeight() - bias, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["Body"]]), glm::vec3(0.0, 1.0, 0.0));
 	painter->drawMesh(4, modelView, light, camera, 1);
 	
 	// **** 画头和帽子 ****
@@ -382,14 +350,14 @@ void drawLuffy()
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3((Body->getLength() + LeftUpperHand->getLength()) / 2, Body->getHeight() - LeftUpperHand->getHeight(), 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftUpperHand->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[LuffyMap["LeftUpperHand"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftUpperHand->getHeight(), 0.0));
 	painter->drawMesh(7, modelView, light, camera, 1);
 
 	// LeftLowerHand
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftLowerHand->getHeight() + bias, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerHand->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[LuffyMap["LeftLowerHand"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["LeftLowerHand"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftLowerHand->getHeight(), 0.0));
 	painter->drawMesh(8, modelView, light, camera, 1);
 
@@ -404,14 +372,14 @@ void drawLuffy()
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3(-(Body->getLength() + RightUpperHand->getLength()) * 41 / 80, Body->getHeight() - RightUpperHand->getHeight(), 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, RightUpperHand->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[LuffyMap["RightUpperHand"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["RightUpperHand"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -RightUpperHand->getHeight(), 0.0));
 	painter->drawMesh(10, modelView, light, camera, 1);
 
 	// RightLowerHand
 	modelView = glm::translate(modelView, glm::vec3(0.0, -RightLowerHand->getHeight() + bias, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerHand->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[LuffyMap["RightLowerHand"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["RightLowerHand"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftLowerHand->getHeight(), 0.0));
 	painter->drawMesh(11, modelView, light, camera, 1);
 
@@ -422,7 +390,7 @@ void drawLuffy()
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3(Body->getLength() * 13.0f / 45.0f, -LeftUpperLeg->getHeight(), 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftUpperLeg->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[LuffyMap["LeftUpperLeg"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["LeftUpperLeg"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftUpperLeg->getHeight(), 0.0));
 	painter->drawMesh(12, modelView, light, camera, 1);
 	//左小腿
@@ -435,7 +403,7 @@ void drawLuffy()
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3(-Body->getLength() * 13.0f / 45.0f, -RightUpperLeg->getHeight(), 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, RightUpperLeg->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[LuffyMap["RightUpperLeg"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["RightUpperLeg"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -RightUpperLeg->getHeight(), 0.0));
 	painter->drawMesh(14, modelView, light, camera, 1);
 	// 右小腿
@@ -502,17 +470,40 @@ void printHelp()
 
 
 // 键盘响应函数
+std::map<std::string, bool> KeyMap;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	float tmp;
 	glm::vec4 ambient;
-	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+	if (action == GLFW_PRESS || action == GLFW_REPEAT || action == GLFW_RELEASE) {
 		switch (key)
 		{
-		case GLFW_KEY_ESCAPE: exit(EXIT_SUCCESS); break;
+		case GLFW_KEY_ESCAPE: 
+			KeyMap["ESCAPE"] = true; 
+			break;
 		case GLFW_KEY_I:
 			myTheta[2] = myTheta[2] + 10.0;
 			while (myTheta[2] > 360) myTheta[2] -= 360;
+			break;
+		case GLFW_KEY_UP:
+		case GLFW_KEY_DOWN:
+		case GLFW_KEY_LEFT:
+		case GLFW_KEY_RIGHT:
+			if (action == GLFW_PRESS)
+			{
+				camera->upAngle = 15.00f;
+				if (key == GLFW_KEY_UP) KeyMap["UP"] = true;
+				else if (key == GLFW_KEY_DOWN) KeyMap["DOWN"] = true;
+				else if (key == GLFW_KEY_LEFT) KeyMap["LEFT"] = true;
+				else if (key == GLFW_KEY_RIGHT) KeyMap["RIGHT"] = true;
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				if (key == GLFW_KEY_UP) KeyMap["UP"] = false;
+				else if (key == GLFW_KEY_DOWN) KeyMap["DOWN"] = false;
+				else if (key == GLFW_KEY_LEFT) KeyMap["LEFT"] = false;
+				else if (key == GLFW_KEY_RIGHT) KeyMap["RIGHT"] = false;
+			}
 			break;
 		//case GLFW_KEY_Q: exit(EXIT_SUCCESS); break;
 		//case GLFW_KEY_1: Axis = Base; break;
@@ -536,17 +527,42 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 int asd = 0;
 void process_key_input(GLFWwindow *window)
 {
-	auto UP = glfwGetKey(window, GLFW_KEY_UP), DOWN = glfwGetKey(window, GLFW_KEY_DOWN), LEFT = glfwGetKey(window, GLFW_KEY_LEFT), RIGHT = glfwGetKey(window, GLFW_KEY_RIGHT);
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if (KeyMap["ESCAPE"])
 		exit(EXIT_SUCCESS);
-	else if (UP == GLFW_PRESS || DOWN == GLFW_PRESS || LEFT == GLFW_PRESS || RIGHT == GLFW_PRESS)
+	else if (KeyMap["UP"] || KeyMap["DOWN"] || KeyMap["LEFT"] || KeyMap["RIGHT"])
 	{
 		moveanimation();
+
+		auto dist = 0.05 * moveSpeed;
 		glm::vec3 trans = Body->getTranslation();
-		if (UP == GLFW_PRESS) trans.z += 0.005 * moveSpeed;
-		else if (DOWN == GLFW_PRESS) trans.z -= 0.005 * moveSpeed;
-		else if (LEFT == GLFW_PRESS) trans.x += 0.005 * moveSpeed;
-		//else if (RIGHT == GLFW_PRESS) trans.x -= 0.005 * moveSpeed;
+		//摄像机需要旋转的角度（与人物一致）
+		GLfloat angle = LuffyTheta[AngleMap["Luffy"]["Body"]];
+		//人物面向方向
+		glm::vec3 dir = glm::normalize(glm::vec3(sin(glm::radians(angle)), 0.0f, cos(glm::radians(angle))));
+
+		//摄像机设置于人物后上方
+		camera->eye = glm::vec4(trans - 2.0f * dir + glm::vec3(0.0f, 1.0f, 0.0f), 1.0);
+		camera->yaw = -angle;  //注意updatecamera里为cos(90 + yaw)，sin(angle) = cos(90 - angle);
+		if (KeyMap["UP"])
+		{
+			trans += glm::vec3(dist * sin(glm::radians(angle)), 0.0, dist * cos(glm::radians(angle)));
+		}
+		if (KeyMap["DOWN"])
+		{
+			trans -= glm::vec3(dist * sin(glm::radians(angle)), 0.0, dist * cos(glm::radians(angle)));
+		}
+		if (KeyMap["LEFT"])
+		{
+			LuffyTheta[AngleMap["Luffy"]["Body"]] += rotateSpeed;
+			if (LuffyTheta[AngleMap["Luffy"]["Body"]] > 360.0f) LuffyTheta[AngleMap["Luffy"]["Body"]] = 0.0f;
+		}
+			// trans += glm::vec3(dist * cos(glm::radians(angle)), 0.0, -dist * sin(glm::radians(angle)));
+		if (KeyMap["RIGHT"])
+		{
+			LuffyTheta[AngleMap["Luffy"]["Body"]] -= rotateSpeed;
+			if (LuffyTheta[AngleMap["Luffy"]["Body"]] > 360.0f) LuffyTheta[AngleMap["Luffy"]["Body"]] = 0.0f;
+		}
+			//trans -= glm::vec3(dist * cos(glm::radians(angle)), 0.0, -dist * sin(glm::radians(angle)));
 		Body->setTranslation(trans);
 	}
 	else camera->keyboard(window);

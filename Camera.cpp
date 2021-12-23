@@ -89,11 +89,10 @@ glm::mat4 Camera::frustum(const GLfloat left, const GLfloat right,
 
 void Camera::updateCamera()
 {
-	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
-	front.y = sin(glm::radians(pitch));
-	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+	front.x = cos(glm::radians(pitch)) * cos(glm::radians(90.0f + yaw));
+	front.y = sin(glm::radians(pitch - upAngle));
+	front.z = cos(glm::radians(pitch)) * sin(glm::radians(90.0f + yaw));
 	front = glm::normalize(front);
-	//std::cout << front.x << " " << front.y << " " << front.z << std::endl;
 }
 
 void Camera::caldeltaTime(float currentFrame)
@@ -112,11 +111,10 @@ void Camera::initCamera(){
 	scale = 1.5;
 	zNear = 0.01;
 	zFar = 100.0;
-	eye = glm::vec4(0.0, 0.5, radius, 1.0);
+	eye = glm::vec4(0.0, 1.0f, radius, 1.0);
 	at = glm::vec4(0.0, 0.0, 0.0, 1.0);
 	up = glm::vec4(0.0, 1.0, 0.0, 0.0);
-	front = at - eye;
-	pitch = 0.0f, yaw = -90.0f;
+	pitch = 0.0f, yaw = -180.0f, upAngle = 0.0f;
 	lastX = 800.0f, lastY = 450.0f;
 	sensitivity = 0.02;
 	cameraSpeed = 0.005;
