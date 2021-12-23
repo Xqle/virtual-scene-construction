@@ -111,7 +111,7 @@ void Camera::initCamera(){
 	scale = 1.5;
 	zNear = 0.01;
 	zFar = 100.0;
-	eye = glm::vec4(0.0, 1.0f, radius, 1.0);
+	eye = glm::vec4(0.0, 0.5f, radius, 1.0);
 	at = glm::vec4(0.0, 0.0, 0.0, 1.0);
 	up = glm::vec4(0.0, 1.0, 0.0, 0.0);
 	pitch = 0.0f, yaw = -180.0f, upAngle = 0.0f;

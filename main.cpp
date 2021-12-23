@@ -51,6 +51,18 @@ TriMesh* RightUpperLeg = new TriMesh();
 TriMesh* LeftLowerLeg = new TriMesh();
 TriMesh* RightLowerLeg = new TriMesh();
 
+// 救护车
+TriMesh* AmbulanceBody = new TriMesh();
+TriMesh* AmbulanceFrontWheels = new TriMesh();
+TriMesh* AmbulanceBackWheels = new TriMesh();
+float AmbulanceTurnDir = 1.0f;
+
+//给对应mesh下标建立索引
+const int NumMeshes = 200;
+std::map<std::string, int> IndexMap;
+glm::vec3 Scale[NumMeshes] = { glm::vec3(0.0, 0.0, 0.0) };
+GLfloat Theta[NumMeshes] = { 0.0 };
+
 Camera* camera = new Camera();
 Light* light = new Light();
 MeshPainter *painter = new MeshPainter();
@@ -88,9 +100,6 @@ public:
 	}
 };
 
-const int NumLuffyParts = 12;
-GLfloat LuffyTheta[12] = {0.0};
-std::map<std::string, std::map<std::string, int>> AngleMap;
 float dir = -1.0, moveSpeed, rotateSpeed;
 float lastFrame;
 //计算移动速度，旋转速度等
@@ -99,57 +108,42 @@ void calMoveSpeed(float currentFrame)
 	float deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 	moveSpeed = 100.0f * deltaTime;
-	rotateSpeed = 50.00f * deltaTime;
+	rotateSpeed = 100.00f * deltaTime;
 }
 
 void moveanimation()
 {
-	if (LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] > 45.0 || LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] < -45.0)
+	if (Theta[IndexMap["LeftUpperHand"]] > 45.0 || Theta[IndexMap["LeftUpperHand"]] < -45.0)
 	{
 		//控制摆动方向
 		dir = -dir;
 		//两个关键帧
 		if (dir < 0)
 		{
-			LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] = 45.00f;
-			LuffyTheta[AngleMap["Luffy"]["RightUpperHand"]] = -45.00f;
-			LuffyTheta[AngleMap["Luffy"]["LeftLowerHand"]] = 0.0f;
-			LuffyTheta[AngleMap["Luffy"]["RightLowerHand"]] = -45.00f;
+			Theta[IndexMap["LeftUpperHand"]] = 45.00f;
+			Theta[IndexMap["RightUpperHand"]] = -45.00f;
+			Theta[IndexMap["LeftLowerHand"]] = 0.0f;
+			Theta[IndexMap["RightLowerHand"]] = -45.00f;
 		}
 		else
 		{
-			LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] = -45.00f;
-			LuffyTheta[AngleMap["Luffy"]["RightUpperHand"]] = 45.00f;
-			LuffyTheta[AngleMap["Luffy"]["LeftLowerHand"]] = -45.00f;
-			LuffyTheta[AngleMap["Luffy"]["RightLowerHand"]] = 0.0f;
+			Theta[IndexMap["LeftUpperHand"]] = -45.00f;
+			Theta[IndexMap["RightUpperHand"]] = 45.00f;
+			Theta[IndexMap["LeftLowerHand"]] = -45.00f;
+			Theta[IndexMap["RightLowerHand"]] = 0.0f;
 		}
 	}
-	LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] += dir * moveSpeed;
+	Theta[IndexMap["LeftUpperHand"]] += dir * moveSpeed;
 	// 左大臂在身体前面的时候，左小臂才开摆
-	if(LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]] < 0) 
-		LuffyTheta[AngleMap["Luffy"]["LeftLowerHand"]] += dir * moveSpeed;
-	LuffyTheta[AngleMap["Luffy"]["RightUpperHand"]] -= dir * moveSpeed;
+	if(Theta[IndexMap["LeftUpperHand"]] < 0) 
+		Theta[IndexMap["LeftLowerHand"]] += dir * moveSpeed;
+	Theta[IndexMap["RightUpperHand"]] -= dir * moveSpeed;
 	// 右大臂在身体前面的时候，右小臂才开摆
-	if (LuffyTheta[AngleMap["Luffy"]["RightUpperHand"]] < 0) 
-		LuffyTheta[AngleMap["Luffy"]["RightLowerHand"]] -= dir * moveSpeed;
-	LuffyTheta[AngleMap["Luffy"]["RightUpperLeg"]] += dir * moveSpeed;
-	LuffyTheta[AngleMap["Luffy"]["LeftUpperLeg"]] -= dir * moveSpeed;
+	if (Theta[IndexMap["RightUpperHand"]] < 0) 
+		Theta[IndexMap["RightLowerHand"]] -= dir * moveSpeed;
+	Theta[IndexMap["RightUpperLeg"]] += dir * moveSpeed;
+	Theta[IndexMap["LeftUpperLeg"]] -= dir * moveSpeed;
 }	
-
-// 关节角
-enum{
-    Base      = 0,
-    LowerArm  = 1,
-    UpperArm  = 2,
-    NumAngles = 3
-};
-int     Axis = Base;
-GLfloat Theta[NumAngles] = {0.0};
-GLfloat myTheta[3] = { 0.0 };
-glm::vec3 Scale[3] = { glm::vec3(0.0, 0.0, 0.0) };
-
-// 菜单选项值
-const int Quit = 4;
 
 
 // 尺寸参数
@@ -168,10 +162,13 @@ void init()
 	cfshader = "shaders/cfshader.glsl";
 	tfshader = "shaders/tfshader.glsl";
 
+	IndexMap["camera"] = 100;   //给camera一个不可能被覆盖的index
+	int idx = 0;
 	// 设置光源位置  --  0
+	IndexMap["light"] = idx++;
 	light->readObj("assets/Myobj/sun/sun.obj");
-	light->setTranslation(glm::vec3(5.0, 10.0, 10.0));
-	light->setScale(glm::vec3(1, 1, 1));
+	light->setTranslation(glm::vec3(30.0, 60.0, 60.0));
+	light->setScale(glm::vec3(10, 10, 10));
 	light->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 环境光
 	light->setDiffuse(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 漫反射
 	light->setSpecular(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 镜面反射
@@ -179,6 +176,7 @@ void init()
 	meshList.push_back(light);
 
 	//创建机器臂的基础立方体  --  1
+	IndexMap["cube"] = idx++;
 	cube->setNormalize(false);
 	cube->generateCube();
 	cube->setTranslation(glm::vec3(0.0, 0.0, 0.0));
@@ -190,11 +188,13 @@ void init()
 	meshList.push_back(cube);
 
 	//草地  --  2
+	IndexMap["land"] = idx++;
 	land->setNormalize(false);
 	land->generateSquare(glm::vec3(0.78f, 0.5f, 0.4f));
 	land->setTranslation(glm::vec3(0.0, -0.001, 0.0));    //加点偏移，不要跟阴影重合
 	land->setRotation(glm::vec3(90.0, 0.0, 0.0));
-	land->setScale(glm::vec3(50, 50, 50));
+	Scale[IndexMap["land"]] = glm::vec3(200.0, 200.0, 200.0);
+	land->setScale(Scale[IndexMap["land"]]);
 	land->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 环境光
 	land->setDiffuse(glm::vec4(0.7, 0.7, 0.7, 1.0)); // 漫反射
 	land->setSpecular(glm::vec4(0.2, 0.2, 0.2, 1.0)); // 镜面反射
@@ -202,124 +202,154 @@ void init()
 	painter->addMesh(land, "land", "assets/grass3.jpg", vshader, tfshader);
 
 	// chr_sword  --  3
+	IndexMap["chr_sword"] = idx++;
 	chr_sword->setNormalize(true);
 	chr_sword->readObj("assets/chr_sword/chr_sword.obj");
-	chr_sword->setTranslation(glm::vec3(1.0, 0.0, 1.0));
 	Scale[2] = glm::vec3(1, 1, 1);
-	chr_sword->setScale(Scale[2]);
+	chr_sword->setScale(Scale[IndexMap["chr_sword"]]);
 	painter->addMesh(chr_sword, "chr_sword", "assets/chr_sword/chr_sword.png", vshader, tfshader);
 	meshList.push_back(chr_sword);
 
 	glm::vec3 LuffyScale = glm::vec3(0.015, 0.015, 0.015);
-
 	//body  --  4
+	IndexMap["Body"] = idx++;
 	Body->setNormalize(false);
 	Body->readObj("assets/Myobj/Luffy/Body.obj");
-	Body->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	Body->setScale(LuffyScale);
+	Scale[IndexMap["Body"]] = LuffyScale;
+	Body->setScale(Scale[IndexMap["Body"]]);
 	painter->addMesh(Body, "Body", "assets/Myobj/Luffy/Body.png", vshader, tfshader);
 	meshList.push_back(Body);
-	AngleMap["Luffy"]["Body"] = 0;
 
 	//Head  --  5
+	IndexMap["Head"] = idx++;
 	Head->setNormalize(false);
 	Head->readObj("assets/Myobj/Luffy/Head.obj");
-	Head->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	Head->setScale(LuffyScale);
+	Scale[IndexMap["Head"]] = LuffyScale;
+	Head->setScale(Scale[IndexMap["Head"]]);
 	painter->addMesh(Head, "Head", "assets/Myobj/Luffy/Head.png", vshader, tfshader);
 	meshList.push_back(Head);
-	AngleMap["Luffy"]["Head"] = 1;
 
 	//Hat  --  6
+	IndexMap["Hat"] = idx++;
 	Hat->setNormalize(false);
 	Hat->readObj("assets/Myobj/Luffy/Hat.obj");
-	Hat->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	Hat->setScale(LuffyScale);
+	Scale[IndexMap["Hat"]] = LuffyScale;
+	Hat->setScale(Scale[IndexMap["Hat"]]);
 	painter->addMesh(Hat, "Hat", "assets/Myobj/Luffy/Hat.png", vshader, tfshader);
 	meshList.push_back(Hat);
-	AngleMap["Luffy"]["Hat"] = 2;
 
 	// LeftUpperHand  --  7
+	IndexMap["LeftUpperHand"] = idx++;
 	LeftUpperHand->setNormalize(false);
 	LeftUpperHand->readObj("assets/Myobj/Luffy/LeftUpperHand.obj");
-	LeftUpperHand->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	LeftUpperHand->setScale(LuffyScale);
+	Scale[IndexMap["LeftUpperHand"]] = LuffyScale;
+	LeftUpperHand->setScale(Scale[IndexMap["LeftUpperHand"]]);
 	painter->addMesh(LeftUpperHand, "LeftUpperHand", "assets/Myobj/Luffy/LeftUpperHand.png", vshader, tfshader);
 	meshList.push_back(LeftUpperHand);
-	AngleMap["Luffy"]["LeftUpperHand"] = 3;
 
 	// LeftLowerHand  --  8
+	IndexMap["LeftLowerHand"] = idx++;
 	LeftLowerHand->setNormalize(false);
 	LeftLowerHand->readObj("assets/Myobj/Luffy/LeftLowerHand.obj");
-	LeftLowerHand->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	LeftLowerHand->setScale(LuffyScale);
+	Scale[IndexMap["LeftLowerHand"]] = LuffyScale;
+	LeftLowerHand->setScale(Scale[IndexMap["LeftLowerHand"]]);
 	painter->addMesh(LeftLowerHand, "LeftLowerHand", "assets/Myobj/Luffy/LeftLowerHand.png", vshader, tfshader);
 	meshList.push_back(LeftLowerHand);
-	AngleMap["Luffy"]["LeftLowerHand"] = 4;
 
 	// Meat  --  9
+	IndexMap["Meat"] = idx++;
 	Meat->setNormalize(false);
 	Meat->readObj("assets/Myobj/Luffy/Meat.obj");
-	Meat->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	Meat->setScale(LuffyScale);
+	Scale[IndexMap["Meat"]] = LuffyScale;
+	Meat->setScale(Scale[IndexMap["Meat"]]);
 	painter->addMesh(Meat, "Meat", "assets/Myobj/Luffy/Meat.png", vshader, tfshader);
 	meshList.push_back(Meat);
-	AngleMap["Luffy"]["Meat"] = 5;
 
 	// RightUpperHand  --  10
+	IndexMap["RightUpperHand"] = idx++;
 	RightUpperHand->setNormalize(false);
 	RightUpperHand->readObj("assets/Myobj/Luffy/RightUpperHand.obj");
-	RightUpperHand->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	RightUpperHand->setScale(LuffyScale);
+	Scale[IndexMap["RightUpperHand"]] = LuffyScale;
+	RightUpperHand->setScale(Scale[IndexMap["RightUpperHand"]]);
 	painter->addMesh(RightUpperHand, "RightUpperHand", "assets/Myobj/Luffy/RightUpperHand.png", vshader, tfshader);
 	meshList.push_back(RightUpperHand);
-	AngleMap["Luffy"]["RightUpperHand"] = 6;
 
 	// RightLowerHand  --  11
+	IndexMap["RightLowerHand"] = idx++;
 	RightLowerHand->setNormalize(false);
 	RightLowerHand->readObj("assets/Myobj/Luffy/RightLowerHand.obj");
-	RightLowerHand->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	RightLowerHand->setScale(LuffyScale);
+	Scale[IndexMap["RightLowerHand"]] = LuffyScale;
+	RightLowerHand->setScale(Scale[IndexMap["RightLowerHand"]]);
 	painter->addMesh(RightLowerHand, "RightLowerHand", "assets/Myobj/Luffy/RightLowerHand.png", vshader, tfshader);
 	meshList.push_back(RightLowerHand);
-	AngleMap["Luffy"]["RightLowerHand"] = 7;
 
 	// LeftUpperLeg  --  12
+	IndexMap["LeftUpperLeg"] = idx++;
 	LeftUpperLeg->setNormalize(false);
 	LeftUpperLeg->readObj("assets/Myobj/Luffy/LeftUpperLeg.obj");
-	LeftUpperLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	LeftUpperLeg->setScale(LuffyScale);
+	Scale[IndexMap["LeftUpperLeg"]] = LuffyScale;
+	LeftUpperLeg->setScale(Scale[IndexMap["LeftUpperLeg"]]);
 	painter->addMesh(LeftUpperLeg, "LeftUpperLeg", "assets/Myobj/Luffy/LeftUpperLeg.png", vshader, tfshader);
 	meshList.push_back(LeftUpperLeg);
-	AngleMap["Luffy"]["LeftUpperLeg"] = 8;
 
 	// LeftLowerLeg  --  13
+	IndexMap["LeftLowerLeg"] = idx++;
 	LeftLowerLeg->setNormalize(false);
 	LeftLowerLeg->readObj("assets/Myobj/Luffy/LeftLowerLeg.obj");
-	LeftLowerLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	LeftLowerLeg->setScale(LuffyScale);
+	Scale[IndexMap["LeftLowerLeg"]] = LuffyScale;
+	LeftLowerLeg->setScale(Scale[IndexMap["LeftLowerLeg"]]);
 	painter->addMesh(LeftLowerLeg, "LeftLowerLeg", "assets/Myobj/Luffy/LeftLowerLeg.png", vshader, tfshader);
 	meshList.push_back(LeftLowerLeg);
-	AngleMap["Luffy"]["LeftLowerLeg"] = 9;
 
 	// RightUpperLeg  --  14
+	IndexMap["RightUpperLeg"] = idx++;
 	RightUpperLeg->setNormalize(false);
 	RightUpperLeg->readObj("assets/Myobj/Luffy/RightUpperLeg.obj");
-	RightUpperLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	RightUpperLeg->setScale(LuffyScale);
+	Scale[IndexMap["RightUpperLeg"]] = LuffyScale;
+	RightUpperLeg->setScale(Scale[IndexMap["RightUpperLeg"]]);
 	painter->addMesh(RightUpperLeg, "RightUpperLeg", "assets/Myobj/Luffy/RightUpperLeg.png", vshader, tfshader);
 	meshList.push_back(RightUpperLeg);
-	AngleMap["Luffy"]["RightUpperLeg"] = 10;
 
 	// RightLowerLeg  --  15
+	IndexMap["RightLowerLeg"] = idx++;
 	RightLowerLeg->setNormalize(false);
 	RightLowerLeg->readObj("assets/Myobj/Luffy/RightLowerLeg.obj");
-	RightLowerLeg->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	RightLowerLeg->setScale(LuffyScale);
+	Scale[IndexMap["RightLowerLeg"]] = LuffyScale;
+	RightLowerLeg->setScale(Scale[IndexMap["RightLowerLeg"]]);
 	painter->addMesh(RightLowerLeg, "RightLowerLeg", "assets/Myobj/Luffy/RightLowerLeg.png", vshader, tfshader);
 	meshList.push_back(RightLowerLeg);
-	AngleMap["Luffy"]["RightLowerLeg"] = 11;
 
+
+	// Ambulance
+	glm::vec3 AmbulanceScale = glm::vec3(0.25, 0.25, 0.25);
+	// Ambulance Body  --  16
+	IndexMap["AmbulanceBody"] = idx++;
+	AmbulanceBody->setNormalize(false);
+	AmbulanceBody->readObj("assets/Myobj/Ambulance/AmbulanceBody.obj");
+	Scale[IndexMap["AmbulanceBody"]] = AmbulanceScale;
+	AmbulanceBody->setScale(Scale[IndexMap["AmbulanceBody"]]);
+	painter->addMesh(AmbulanceBody, "AmbulanceBody", "assets/Myobj/Ambulance/AmbulanceBody.png", vshader, tfshader);
+	meshList.push_back(AmbulanceBody);
+
+	// Ambulance Front Wheels  --  17
+	IndexMap["AmbulanceFrontWheels"] = idx++;
+	AmbulanceFrontWheels->setNormalize(false);
+	AmbulanceFrontWheels->readObj("assets/Myobj/Ambulance/AmbulanceFrontWheels.obj");
+	Scale[IndexMap["AmbulanceFrontWheels"]] = AmbulanceScale;
+	AmbulanceFrontWheels->setScale(Scale[IndexMap["AmbulanceFrontWheels"]]);
+	painter->addMesh(AmbulanceFrontWheels, "AmbulanceFrontWheels", "assets/Myobj/Ambulance/AmbulanceFrontWheels.png", vshader, tfshader);
+	meshList.push_back(AmbulanceFrontWheels);
+
+	// Ambulance Back Wheels  --  18
+	IndexMap["AmbulanceBackWheels"] = idx++;
+	AmbulanceBackWheels->setNormalize(false);
+	AmbulanceBackWheels->readObj("assets/Myobj/Ambulance/AmbulanceBackWheels.obj");
+	Scale[IndexMap["AmbulanceBackWheels"]] = AmbulanceScale;
+	AmbulanceBackWheels->setScale(Scale[IndexMap["AmbulanceBackWheels"]]);
+	painter->addMesh(AmbulanceBackWheels, "AmbulanceBackWheels", "assets/Myobj/Ambulance/AmbulanceBackWheels.png", vshader, tfshader);
+	meshList.push_back(AmbulanceBackWheels);
+	// Ambulance Turn Direction  --  101
+	IndexMap["AmbulanceTurnDir"] = 101;
 
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 }
@@ -328,21 +358,21 @@ void drawLuffy()
 {
 	float bias = 0.5;
 
-	// **** 画身体 ****
+	// **** 画Body ****
 	MatrixStack mstack;
 	glm::mat4 modelView = Body->getModelMatrix();
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerLeg->getHeight() + LeftUpperLeg->getHeight() - bias, 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["Body"]]), glm::vec3(0.0, 1.0, 0.0));
-	painter->drawMesh(4, modelView, light, camera, 1);
+	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["Body"]]), glm::vec3(0.0, 1.0, 0.0));
+	painter->drawMesh(IndexMap["Body"], modelView, light, camera, 1);
 	
 	// **** 画头和帽子 ****
-	// 头
+	// Head
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3(0.0, Body->getHeight(), 0.0));
-	painter->drawMesh(5, modelView, light, camera, 1);
-	// 帽子
+	painter->drawMesh(IndexMap["Head"], modelView, light, camera, 1);
+	// Hat
 	modelView = glm::translate(modelView, glm::vec3(0.0, Head->getHeight(), 0.0));
-	painter->drawMesh(6, modelView, light, camera, 1);
+	painter->drawMesh(IndexMap["Hat"], modelView, light, camera, 1);
 
 	// **** 画左大臂和左小臂和肉
 	// LeftUpperHand
@@ -350,16 +380,16 @@ void drawLuffy()
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3((Body->getLength() + LeftUpperHand->getLength()) / 2, Body->getHeight() - LeftUpperHand->getHeight(), 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftUpperHand->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["LeftUpperHand"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["LeftUpperHand"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftUpperHand->getHeight(), 0.0));
-	painter->drawMesh(7, modelView, light, camera, 1);
+	painter->drawMesh(IndexMap["LeftUpperHand"], modelView, light, camera, 1);
 
 	// LeftLowerHand
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftLowerHand->getHeight() + bias, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerHand->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["LeftLowerHand"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["LeftLowerHand"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftLowerHand->getHeight(), 0.0));
-	painter->drawMesh(8, modelView, light, camera, 1);
+	painter->drawMesh(IndexMap["LeftLowerHand"], modelView, light, camera, 1);
 
 	// Meat
 	modelView = glm::translate(modelView, glm::vec3(LeftLowerHand->getLength() / 4, Meat->getWidth() / 8, 0.0));
@@ -372,45 +402,70 @@ void drawLuffy()
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3(-(Body->getLength() + RightUpperHand->getLength()) * 41 / 80, Body->getHeight() - RightUpperHand->getHeight(), 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, RightUpperHand->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["RightUpperHand"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["RightUpperHand"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -RightUpperHand->getHeight(), 0.0));
-	painter->drawMesh(10, modelView, light, camera, 1);
+	painter->drawMesh(IndexMap["RightUpperHand"], modelView, light, camera, 1);
 
 	// RightLowerHand
 	modelView = glm::translate(modelView, glm::vec3(0.0, -RightLowerHand->getHeight() + bias, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerHand->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["RightLowerHand"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["RightLowerHand"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftLowerHand->getHeight(), 0.0));
-	painter->drawMesh(11, modelView, light, camera, 1);
+	painter->drawMesh(IndexMap["RightLowerHand"], modelView, light, camera, 1);
 
 	// **** 画左大腿和左小腿 **** 
-	// 左大腿
+	// LeftUpperLeg
 	modelView = mstack.pop();
 	modelView = glm::translate(modelView, glm::vec3(0.0, bias / 2, 0.0));
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3(Body->getLength() * 13.0f / 45.0f, -LeftUpperLeg->getHeight(), 0.0));
+	// 为了得到正确的旋转，需要先将腿往下移，绕原点旋转，再恢复原位
 	modelView = glm::translate(modelView, glm::vec3(0.0, LeftUpperLeg->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["LeftUpperLeg"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["LeftUpperLeg"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftUpperLeg->getHeight(), 0.0));
-	painter->drawMesh(12, modelView, light, camera, 1);
-	//左小腿
+	painter->drawMesh(IndexMap["LeftUpperLeg"], modelView, light, camera, 1);
+	// LeftLowerLeg
 	modelView = glm::translate(modelView, glm::vec3(0.0, -LeftLowerLeg->getHeight() + bias / 2, 0.0));
-	painter->drawMesh(13, modelView, light, camera, 1);
+	painter->drawMesh(IndexMap["LeftLowerLeg"], modelView, light, camera, 1);
 
 	// **** 画右大腿和右小腿 ****
-	// 右大腿
+	// RightUpperLeg
 	modelView = mstack.pop();
 	mstack.push(modelView);
 	modelView = glm::translate(modelView, glm::vec3(-Body->getLength() * 13.0f / 45.0f, -RightUpperLeg->getHeight(), 0.0));
+	// 理由同上
 	modelView = glm::translate(modelView, glm::vec3(0.0, RightUpperLeg->getHeight(), 0.0));
-	modelView = glm::rotate(modelView, glm::radians(LuffyTheta[AngleMap["Luffy"]["RightUpperLeg"]]), glm::vec3(1.0, 0.0, 0.0));
+	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["RightUpperLeg"]]), glm::vec3(1.0, 0.0, 0.0));
 	modelView = glm::translate(modelView, glm::vec3(0.0, -RightUpperLeg->getHeight(), 0.0));
-	painter->drawMesh(14, modelView, light, camera, 1);
-	// 右小腿
+	painter->drawMesh(IndexMap["RightUpperLeg"], modelView, light, camera, 1);
+	// RightLowerLeg
 	modelView = glm::translate(modelView, glm::vec3(0.0, -RightLowerLeg->getHeight() + bias / 2, 0.0));
-	painter->drawMesh(15, modelView, light, camera, 1);
+	painter->drawMesh(IndexMap["RightLowerLeg"], modelView, light, camera, 1);
 }
+void drawAmbulance()
+{
+	glm::mat4 modelView = AmbulanceBody->getModelMatrix();
+	// Ambulance Body
+	modelView = glm::translate(modelView, glm::vec3(-5.0f, 0.0f, 0.0f));
+	modelView = glm::translate(modelView, glm::vec3(0.0f, AmbulanceFrontWheels->getHeight() * 0.2, 0.0f));
+	painter->drawMesh(IndexMap["AmbulanceBody"], modelView, light, camera, 1);
+	// Ambulance Front Wheels
+	modelView = glm::translate(modelView, glm::vec3(0.0f, - AmbulanceFrontWheels->getHeight() * 0.2, 0.0f));
+	// 前轮的转动，包括方向转动
+	modelView = glm::translate(modelView, glm::vec3(0.0f, AmbulanceFrontWheels->getHeight() * 0.5, -AmbulanceFrontWheels->getWidth() * 21 / 10));
+	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["AmbulanceFrontWheels"]]), glm::vec3(1.0f, 0.0f, 0.0f));
+	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["AmbulanceTurnDir"]]), glm::vec3(0.0f, AmbulanceTurnDir, 0.0f));
+	modelView = glm::translate(modelView, glm::vec3(0.0f, -AmbulanceFrontWheels->getHeight() * 0.5, AmbulanceFrontWheels->getWidth() * 21 / 10));
+	painter->drawMesh(IndexMap["AmbulanceFrontWheels"], modelView, light, camera, 1);
 
+	// Ambulance Back Wheels	
+	// 后轮的转动
+	modelView = glm::translate(modelView, glm::vec3(0.0f, AmbulanceBackWheels->getHeight() * 0.5, AmbulanceBackWheels->getWidth() * 21 / 10));
+	modelView = glm::rotate(modelView, glm::radians(60.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	modelView = glm::translate(modelView, glm::vec3(0.0f, -AmbulanceBackWheels->getHeight() * 0.5, -AmbulanceBackWheels->getWidth() * 21 / 10));
+	painter->drawMesh(IndexMap["AmbulanceBackWheels"], modelView, light, camera, 1);
+
+}
 void display()
 {
 // #ifdef __APPLE__ // 解决 macOS 10.15 显示画面缩小问题
@@ -428,10 +483,12 @@ void display()
 
 	chr_sword->setScale(Scale[2]);
 	modelView = chr_sword->getModelMatrix();
-	modelView = glm::rotate(modelView, glm::radians(myTheta[2]), glm::vec3(0.0, 1.0, 0.0));
+	modelView = glm::translate(modelView, glm::vec3(1.0, 0.0, 1.0));
+	modelView = glm::rotate(modelView, glm::radians(Theta[2]), glm::vec3(0.0, 1.0, 0.0));
 	painter->drawMesh(3, modelView, light, camera, 1);
 
 	drawLuffy();
+	drawAmbulance();
 }
 
 void printHelp()
@@ -482,8 +539,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			KeyMap["ESCAPE"] = true; 
 			break;
 		case GLFW_KEY_I:
-			myTheta[2] = myTheta[2] + 10.0;
-			while (myTheta[2] > 360) myTheta[2] -= 360;
+			Theta[IndexMap["chr_sword"]] += 10.0;
+			if (Theta[IndexMap["chr_sword"]] > 360.0) Theta[IndexMap["chr_sword"]] -= 360.0;
 			break;
 		case GLFW_KEY_UP:
 		case GLFW_KEY_DOWN:
@@ -491,6 +548,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		case GLFW_KEY_RIGHT:
 			if (action == GLFW_PRESS)
 			{
+				camera->pitch = 0.0f;
+				camera->yaw = - Theta[IndexMap["Body"]];  //注意updatecamera里为cos(90 + yaw)，sin(angle) = cos(90 - angle);
 				camera->upAngle = 15.00f;
 				if (key == GLFW_KEY_UP) KeyMap["UP"] = true;
 				else if (key == GLFW_KEY_DOWN) KeyMap["DOWN"] = true;
@@ -527,6 +586,17 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 int asd = 0;
 void process_key_input(GLFWwindow *window)
 {
+	//全部键松开缓慢恢复站立姿势
+	if (!KeyMap["UP"] && !KeyMap["DOWN"] && !KeyMap["LEFT"] && !KeyMap["RIGHT"])
+	{
+		for (int i = IndexMap["Body"]; i < IndexMap["AmbulanceBody"]; i++)
+			if (i != IndexMap["Body"] && fabs(Theta[i]) > 0.01)
+			{
+				float s = Theta[i] / fabs(Theta[i]);
+				Theta[i] -= 2 * s * rotateSpeed;
+			}
+	}
+
 	if (KeyMap["ESCAPE"])
 		exit(EXIT_SUCCESS);
 	else if (KeyMap["UP"] || KeyMap["DOWN"] || KeyMap["LEFT"] || KeyMap["RIGHT"])
@@ -536,13 +606,12 @@ void process_key_input(GLFWwindow *window)
 		auto dist = 0.05 * moveSpeed;
 		glm::vec3 trans = Body->getTranslation();
 		//摄像机需要旋转的角度（与人物一致）
-		GLfloat angle = LuffyTheta[AngleMap["Luffy"]["Body"]];
+		GLfloat angle = Theta[IndexMap["Body"]];
 		//人物面向方向
 		glm::vec3 dir = glm::normalize(glm::vec3(sin(glm::radians(angle)), 0.0f, cos(glm::radians(angle))));
 
 		//摄像机设置于人物后上方
 		camera->eye = glm::vec4(trans - 2.0f * dir + glm::vec3(0.0f, 1.0f, 0.0f), 1.0);
-		camera->yaw = -angle;  //注意updatecamera里为cos(90 + yaw)，sin(angle) = cos(90 - angle);
 		if (KeyMap["UP"])
 		{
 			trans += glm::vec3(dist * sin(glm::radians(angle)), 0.0, dist * cos(glm::radians(angle)));
@@ -553,19 +622,23 @@ void process_key_input(GLFWwindow *window)
 		}
 		if (KeyMap["LEFT"])
 		{
-			LuffyTheta[AngleMap["Luffy"]["Body"]] += rotateSpeed;
-			if (LuffyTheta[AngleMap["Luffy"]["Body"]] > 360.0f) LuffyTheta[AngleMap["Luffy"]["Body"]] = 0.0f;
+			camera->yaw = -angle;  //转弯强制锁定视角
+			Theta[IndexMap["Body"]] += rotateSpeed;
+			if (Theta[IndexMap["Body"]] > 360.0f) Theta[IndexMap["Body"]] -= 360.0f;
 		}
 			// trans += glm::vec3(dist * cos(glm::radians(angle)), 0.0, -dist * sin(glm::radians(angle)));
 		if (KeyMap["RIGHT"])
 		{
-			LuffyTheta[AngleMap["Luffy"]["Body"]] -= rotateSpeed;
-			if (LuffyTheta[AngleMap["Luffy"]["Body"]] > 360.0f) LuffyTheta[AngleMap["Luffy"]["Body"]] = 0.0f;
+			camera->yaw = -angle;  //转弯强制锁定视角
+			Theta[IndexMap["Body"]] -= rotateSpeed;
+			if (Theta[IndexMap["Body"]] < 0.0f) Theta[IndexMap["Body"]] += 360.0f;
 		}
 			//trans -= glm::vec3(dist * cos(glm::radians(angle)), 0.0, -dist * sin(glm::radians(angle)));
 		Body->setTranslation(trans);
 	}
-	else camera->keyboard(window);
+	else
+		camera->keyboard(window);
+
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
