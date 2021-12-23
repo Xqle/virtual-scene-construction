@@ -30,7 +30,7 @@ Camera* camera = new Camera();
 Light* light = new Light();
 MeshPainter* painter = new MeshPainter();
 
-TriMesh* cube = new TriMesh();
+TriMesh* BackGround = new TriMesh();
 TriMesh* chr_sword = new TriMesh();
 TriMesh* land = new TriMesh();
 
@@ -171,12 +171,12 @@ const GLfloat LOWER_ARM_WIDTH  = 0.1;
 
 void init()
 {
-	std::string vshader, cfshader, tfshader;
+	std::string vshader, cfshader, tfshader, NoPhonefshader;
 	// 读取着色器并使用
 	vshader = "shaders/vshader.glsl";
 	cfshader = "shaders/cfshader.glsl";
 	tfshader = "shaders/tfshader.glsl";
-
+	NoPhonefshader = "shaders/NoPhonefshader.glsl";
 	int idx = 0, CtrlMeshMapIndex = 0;
 	IndexMap["camera"] = 100;   //给camera一个不可能被覆盖的index
 	CtrlMeshMap[CtrlMeshMapIndex++] = "camera";   //摄像机可控制
@@ -184,25 +184,24 @@ void init()
 	// 设置光源位置  --  0
 	IndexMap["light"] = idx++;
 	light->readObj("assets/Myobj/sun/sun.obj");
-	light->setTranslation(glm::vec3(30.0, 60.0, 60.0));
-	light->setScale(glm::vec3(10, 10, 10));
+	light->setTranslation(glm::vec3(20.0, 45.0f, 20.0));
+	light->setScale(glm::vec3(2, 2, 2));
 	light->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 环境光
 	light->setDiffuse(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 漫反射
 	light->setSpecular(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 镜面反射
 	painter->addMesh(light, "light", "assets/Myobj/sun/sun.png", vshader, tfshader);
 	meshList.push_back(light);
 
-	//创建机器臂的基础立方体  --  1
-	IndexMap["cube"] = idx++;
-	cube->setNormalize(false);
-	cube->generateCube();
-	cube->setTranslation(glm::vec3(0.0, 0.0, 0.0));
-	cube->setRotation(glm::vec3(0.0, 0.0, 0.0));
-	cube->setScale(glm::vec3(1.0, 1.0, 1.0));
+	// BackGround  --  1
+	IndexMap["BackGround"] = idx++;
+	BackGround->setNormalize(false);
+	BackGround->readObj("assets/Myobj/BackGround/BackGround.obj");
+	BackGround->setTranslation(glm::vec3(0.0, 0.0, 0.0));
+	BackGround->setRotation(glm::vec3(0.0, 0.0, 0.0));
+	BackGround->setScale(glm::vec3(1.0, 1.0, 1.0));
 	// 加到painter中
-	// 指定纹理与着色器，因为不用纹理图片所以就传个空字符串进去了
-	painter->addMesh(cube, "Cube", "", vshader, cfshader);
-	meshList.push_back(cube);
+	painter->addMesh(BackGround, "BackGround", "assets/Myobj/BackGround/BackGround.png", vshader, NoPhonefshader);
+	meshList.push_back(BackGround);
 
 	//草地  --  2
 	IndexMap["land"] = idx++;
@@ -500,6 +499,10 @@ void display()
 	
 	modelView = light->getModelMatrix();
 	painter->drawMesh(0, modelView, light, camera, 0);
+
+	modelView = BackGround->getModelMatrix();
+	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
+	painter->drawMesh(1, modelView, light, camera, 0);
 
 	modelView = land->getModelMatrix();
 	painter->drawMesh(2, modelView, light, camera, 0);
