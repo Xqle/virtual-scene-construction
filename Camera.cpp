@@ -150,10 +150,6 @@ void Camera::keyboard(GLFWwindow* window)
 		glm::vec4 delta = glm::vec4(cameraSpeed * glm::normalize(glm::cross(ftmp, utmp)), 1.0);
 		eye += delta;
 	}
-	// 空格键初始化所有参数
-	else if (SPACE == GLFW_PRESS) {
-		initCamera();
-	}
 }
 
 void Camera::mouse(double xpos, double ypos)
