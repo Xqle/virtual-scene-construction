@@ -67,11 +67,12 @@ TriMesh* Tree2 = new TriMesh();
 
 // 城堡
 TriMesh* Castle = new TriMesh();
+
 //给对应mesh下标建立索引
 const int NumMeshes = 200;
-std::map<std::string, int> IndexMap;
-glm::vec3 Scale[NumMeshes] = { glm::vec3(0.0, 0.0, 0.0) };
-GLfloat Theta[NumMeshes] = { 0.0 };
+std::map<std::string, int> IndexMap;   // 通过名字得到索引
+glm::vec3 Scale[NumMeshes] = { glm::vec3(0.0, 0.0, 0.0) };  // 下标对应物体索引
+GLfloat Theta[NumMeshes] = { 0.0 };  // 下标对应物体索引
 
 const int NumCtrlMesh = 3;  //可以控制的Mesh数量
 std::map<int, std::string> CtrlMeshMap;
@@ -111,7 +112,9 @@ public:
 	}
 };
 
+// dir控制摆动方向
 float dir = -1.0, moveSpeedBase = 100.0f, moveSpeed, rotateSpeedBase = 100.0f, rotateSpeed;
+// 上一帧的时间，用时间平衡不同性能机器的移动速度
 float lastFrame;
 //计算移动速度，旋转速度等
 void calMoveSpeed(float currentFrame)
@@ -122,6 +125,7 @@ void calMoveSpeed(float currentFrame)
 	rotateSpeed = rotateSpeedBase * deltaTime;
 }
 
+// 移动时的动画
 void moveanimation()
 {
 	// 路飞摆手动画
@@ -492,6 +496,7 @@ void drawAmbulance()
 	painter->drawMesh(IndexMap["AmbulanceBody"], modelView, light, camera, 1);
 
 	modelView = glm::translate(modelView, glm::vec3(0.0f, -AmbulanceFrontWheels->getHeight() * 0.2, 0.0f));
+
 	// Ambulance Front Wheels
 	// 前轮的转动
 	mstack.push(modelView);
@@ -557,7 +562,7 @@ void drawTree()
 	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
 	painter->drawMesh(IndexMap["Tree1"], modelView, light, camera, 1);
 
-	// Tree2
+	// Tree2  --  四个角落的大树
 	modelView = Tree2->getModelMatrix();
 	modelView = glm::translate(modelView, glm::vec3(20.0f, 0.0f, 20.0f));
 	painter->drawMesh(IndexMap["Tree2"], modelView, light, camera, 1);
@@ -603,14 +608,21 @@ void display()
 	modelView = glm::rotate(modelView, glm::radians(Theta[2]), glm::vec3(0.0, 1.0, 0.0));
 	painter->drawMesh(IndexMap["chr_sword"], modelView, light, camera, 1);
 
+	// 路飞
 	drawLuffy();
+
+	// 救护车
 	drawAmbulance();
+
+	// 树
 	drawTree();
 
+	// 城堡
 	modelView = Castle->getModelMatrix();
 	painter->drawMesh(IndexMap["Castle"], modelView, light, camera, 1);
 }
 
+// 帮助信息
 void printHelp()
 {
 	std::cout << "================================================" << std::endl;
@@ -622,21 +634,19 @@ void printHelp()
 		"[Window]" << std::endl <<
 		"ESC:		Exit" << std::endl <<
 
-		"[Mesh]" << std::endl <<
-		"W:	Control the current mesh to move forward" << std::endl <<
-		"S:	Control the current mesh to move backward" << std::endl <<
-		"A:	Control the current mesh to turn left" << std::endl <<
-		"D:	Control the current mesh to turn right" << std::endl <<
-		"SPACE: Switch to the next mesh or the camera" << std::endl <<
-		"LEFT: To watch the mesh from the left of the mesh" <<
+		std::endl <<
+		"[Camera / Mesh]" << std::endl <<
+		"W:	Control the camera / the current mesh to move forward" << std::endl <<
+		"S:	Control the camera / the current meshto move backward" << std::endl <<
+		"A:	Control the camera / the current meshto move left" << std::endl <<
+		"D:	Control the camera / the current meshto move right" << std::endl <<
+		"SPACE: Switch to the next mesh" << std::endl <<
+		"8:	Speed up" << std::endl <<
+		"9: Speed down" <<
 
 		std::endl <<
-		"[Camera]" << std::endl <<
-		"W:	Control the camera to move forward" << std::endl <<
-		"S:	Control the camera to move backward" << std::endl <<
-		"A:	Control the camera to move left" << std::endl <<
-		"D:	Control the camera to move right" << std::endl <<
-		"SPACE: Switch to the next mesh" <<
+		"[Mesh]" << std::endl <<
+		"LEFT: To view the mesh from the left" <<
 
 		std::endl <<
 		"[Light]" << std::endl <<
@@ -644,12 +654,10 @@ void printHelp()
 		"K:	Control the light to move backward on the Z axis" << std::endl <<
 		"J:	Control the light to move forward on the X axis" << std::endl <<
 		"L:	Control the light to move backward on the X axis" << std::endl;
-		
 }
 
-
 // 键盘响应函数
-std::map<std::string, bool> KeyMap;
+std::map<std::string, bool> KeyMap;  // 按键映射，按某个键会 激活 对应的key，松开某些键会 去激活 对应的key
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	float tmp;
@@ -682,7 +690,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 					glm::vec3 dir = glm::normalize(glm::vec3(sin(glm::radians(angle)), 0.0f, cos(glm::radians(angle))));
 					camera->eye += glm::vec4(-dir + glm::vec3(0.0f, 0.1f, 0.0f), 1.0);
 				}
-				std::cout << CurMeshName << std::endl;
 			}
 			break;
 		case GLFW_KEY_ESCAPE: 
@@ -859,6 +866,7 @@ void process_key_input(GLFWwindow *window)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+	//鼠标控制摄像机
 	camera->mouse(xpos, ypos);
 }
 

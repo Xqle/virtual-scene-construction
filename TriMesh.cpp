@@ -65,6 +65,7 @@ std::vector<glm::vec3> TriMesh::getColors(){ return colors; }
 std::vector<glm::vec3> TriMesh::getNormals(){ return normals;}
 std::vector<glm::vec2> TriMesh::getTextures(){ return textures; }
 
+// 增加三个函数，获取物体的长宽高
 float TriMesh::getLength() { return mesh_length; }
 float TriMesh::getWidth() { return mesh_width; }
 float TriMesh::getHeight() { return mesh_height; }
@@ -160,6 +161,7 @@ void TriMesh::cleanData()
 	textures.clear();
 }
 
+// 增加了物体长宽高的计算
 void TriMesh::storeFacesPoints()
 {
 	// 将读取的顶点根据三角面片上的顶点下标逐个加入
@@ -202,6 +204,7 @@ void TriMesh::storeFacesPoints()
 			minZ = std::min(vertex_positions[i].z, minZ);
 			maxZ = std::max(vertex_positions[i].z, maxZ);
 		}
+		// 计算的物体长宽高
 		for (int i = 0; i < vertex_positions.size(); i++) vertex_positions[i].y -= minY;
 		this->mesh_length = maxX - minX;
 		this->mesh_height = maxY - minY;
@@ -330,7 +333,7 @@ void TriMesh::generateTriangle(glm::vec3 color)
 
 	storeFacesPoints();
 }
-
+// 修改了纹理坐标，使纹理可以复制
 void TriMesh::generateSquare(glm::vec3 color)
 {
 	// 创建顶点前要先把那些vector清空
@@ -585,6 +588,7 @@ void TriMesh::readOff(const std::string &filename)
 	storeFacesPoints();
 };
 
+// 将物体底面移到y=0平面
 void TriMesh::readObj(const std::string& filename)
 {
 	std::ifstream fin(filename);
@@ -599,7 +603,7 @@ void TriMesh::readObj(const std::string& filename)
 	cleanData();
 
 	int face_cnt = 0;
-	float minY = 1e9, maxY = -1e9, minX = 1e9, maxX = -1e9, minZ = minX, maxZ = maxX;
+	float minY = 1e9, maxY = -1e9;
 	while (std::getline(fin, line))
 	{
 		std::istringstream sin(line);
@@ -622,10 +626,6 @@ void TriMesh::readObj(const std::string& filename)
 				vertex_positions.push_back(node);
 				minY = std::min(minY, _y);
 				maxY = std::max(maxY, _y);
-				minX = std::min(minX, _x);
-				maxX = std::max(maxX, _x);
-				minZ = std::min(minZ, _x);
-				maxZ = std::max(maxZ, _x);
 			}
 			// vertex_normals
 			else if (type == "vn")
@@ -657,6 +657,7 @@ void TriMesh::readObj(const std::string& filename)
 		// 其中vertex_color和color_index可以用法向量的数值赋值
 	}
 
+	// 将物体底部移到y = 0
 	for (int i = 0; i < vertex_positions.size(); i++) vertex_positions[i].y -= minY;
 	
 

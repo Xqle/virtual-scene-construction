@@ -10,6 +10,7 @@ Camera::~Camera() {}
 
 glm::mat4 Camera::getViewMatrix()
 {
+	// 传入摄像头看向的方向向量front而不是at
 	return this->lookAt(eye, front, up);
 }
 
@@ -29,6 +30,8 @@ glm::mat4 Camera::lookAt(const glm::vec4& eye, const glm::vec4& front, const glm
 	glm::vec3 eye_3 = eye;
 	glm::vec3 front_3 = front;
 	glm::vec3 up_3 = up;
+	
+	// eye + front就是对应的at
 	glm::mat4 view = glm::lookAt(eye_3, eye_3 + front_3, up_3);
 
 	return view;
@@ -90,6 +93,7 @@ glm::mat4 Camera::frustum(const GLfloat left, const GLfloat right,
 
 void Camera::updateCamera()
 {
+	// 利用欧拉角更新摄像机看向的方向
 	front.x = cos(glm::radians(pitch)) * cos(glm::radians(90.0f + yaw));
 	front.y = sin(glm::radians(pitch - upAngle));
 	front.z = cos(glm::radians(pitch)) * sin(glm::radians(90.0f + yaw));
@@ -160,8 +164,10 @@ void Camera::keyboard(GLFWwindow* window)
 	eye.z = std::max(-25.0f, eye.z);
 }
 
+// 鼠标控制摄像头方向，利用欧拉角
 void Camera::mouse(double xpos, double ypos)
 {
+	// 如果鼠标是第一次移动，直接初始化lastX和lastY
 	if (firstMouse)
 	{
 		lastX = xpos;
@@ -170,6 +176,7 @@ void Camera::mouse(double xpos, double ypos)
 	}
 
 	float xoffset = xpos - lastX;
+	// 注意要反过来，因为原点在左上方；
 	float yoffset = lastY - ypos;
 	lastX = xpos;
 	lastY = ypos;

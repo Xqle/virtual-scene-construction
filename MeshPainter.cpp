@@ -177,7 +177,7 @@ void MeshPainter::drawMesh(TriMesh* mesh, openGLObject &object, Light *light, Ca
 
 };
 
-
+// 增加了bool变量：need_shadow，用于指定是否需要绘制阴影
 void MeshPainter::drawMesh(int i, glm::mat4 modelMatrix, Light *light, Camera* camera, bool need_shadow){
     
 	openGLObject &object = opengl_objects[i];
@@ -205,11 +205,10 @@ void MeshPainter::drawMesh(int i, glm::mat4 modelMatrix, Light *light, Camera* c
     
 	// 将材质和光源数据传递给着色器
 	bindLightAndMaterial(mesh, object, light, camera);
-	// 绘制
-	// drawMesh(meshes[i], opengl_objects[i], light, camera);
 
 	glDrawArrays(GL_TRIANGLES, 0, mesh->getPoints().size());
 
+	// 如果需要绘制阴影，则绘制阴影
 	if (need_shadow)
 	{
 		modelMatrix = light->getShadowProjectionMatrix() * modelMatrix;

@@ -56,13 +56,13 @@ public:
 	// 正交投影参数
 	float scale;
 	// 鼠标控制视角
-	float pitch;
+	float pitch;       // 两个欧拉角
 	float yaw;
 	float lastX, lastY;
-	float sensitivity;
+	float sensitivity; // 鼠标灵敏度
 	float cameraSpeedBase;
-	float cameraSpeed;
-	bool firstMouse;
+	float cameraSpeed; // 摄像头移动速度
+	bool firstMouse;   // 用于初始化鼠标位置
 	// 渲染时间，用于平衡不同机器的移动速度
 	float deltaTime; // 当前帧与上一帧的时间差
 	float lastFrame; // 上一帧的时间
