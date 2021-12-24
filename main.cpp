@@ -714,8 +714,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		// 按 8 加速
 		case GLFW_KEY_8:
-			// 相机最高不过 8.0f，物体最高不过 200.0f；
-			if (CurMeshName == "camera") camera->cameraSpeedBase = std::min(camera->cameraSpeedBase + 0.5f, 8.0f);
+			// 相机最高不过 16.0f，物体最高不过 200.0f；
+			if (CurMeshName == "camera") camera->cameraSpeedBase = std::min(camera->cameraSpeedBase + 0.5f, 16.0f);
 			else
 			{
 				moveSpeedBase = std::min(moveSpeedBase + 10.0f, 200.0f);

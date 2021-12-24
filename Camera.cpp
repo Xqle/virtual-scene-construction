@@ -157,11 +157,12 @@ void Camera::keyboard(GLFWwindow* window)
 		eye += delta;
 	}
 	//空气墙
-	eye.x = std::min(25.0f, eye.x); 
-	eye.x = std::max(-25.0f, eye.x);
+	eye.x = std::min(24.50f, eye.x); 
+	eye.x = std::max(-24.50f, eye.x);
+	eye.y = std::min(35.00f, eye.y);
 	eye.y = std::max(0.01f, eye.y);
-	eye.z = std::min(25.0f, eye.z); 
-	eye.z = std::max(-25.0f, eye.z);
+	eye.z = std::min(24.50f, eye.z); 
+	eye.z = std::max(-24.50f, eye.z);
 }
 
 // 鼠标控制摄像头方向，利用欧拉角
