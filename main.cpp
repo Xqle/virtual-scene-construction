@@ -220,6 +220,7 @@ void init()
 	IndexMap["chr_sword"] = idx++;
 	chr_sword->setNormalize(true);
 	chr_sword->readObj("assets/chr_sword/chr_sword.obj");
+	chr_sword->setTranslation(glm::vec3(1.0f, 0.0f, 16.0f));
 	Scale[2] = glm::vec3(1, 1, 1);
 	chr_sword->setScale(Scale[IndexMap["chr_sword"]]);
 	painter->addMesh(chr_sword, "chr_sword", "assets/chr_sword/chr_sword.png", vshader, tfshader);
@@ -231,6 +232,7 @@ void init()
 	CtrlMeshMap[CtrlMeshMapIndex++] = "Body";     // 路飞可控制
 	Body->setNormalize(false);
 	Body->readObj("assets/Myobj/Luffy/Body.obj");
+	Body->setTranslation(glm::vec3(0.0f, 0.0f, 18.0f));
 	Scale[IndexMap["Body"]] = LuffyScale;
 	Body->setScale(Scale[IndexMap["Body"]]);
 	painter->addMesh(Body, "Body", "assets/Myobj/Luffy/Body.png", vshader, tfshader);
@@ -342,7 +344,7 @@ void init()
 	IndexMap["AmbulanceBody"] = idx++;
 	CtrlMeshMap[CtrlMeshMapIndex++] = "AmbulanceBody";  //救护车可控制
 	AmbulanceBody->setNormalize(false);
-	AmbulanceBody->setTranslation(glm::vec3(-2.00f, 0.0f, 0.0f));
+	AmbulanceBody->setTranslation(glm::vec3(-1.0f, 0.0f, 16.0f));
 	AmbulanceBody->readObj("assets/Myobj/Ambulance/AmbulanceBody.obj");
 	Scale[IndexMap["AmbulanceBody"]] = AmbulanceScale;
 	AmbulanceBody->setScale(Scale[IndexMap["AmbulanceBody"]]);
@@ -399,7 +401,7 @@ void drawLuffy()
 	// **** 画Body ****
 	MatrixStack mstack;
 	glm::mat4 modelView = Body->getModelMatrix();
-	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerLeg->getHeight() + LeftUpperLeg->getHeight() - bias, 1200.0f));
+	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerLeg->getHeight() + LeftUpperLeg->getHeight() - bias, 0.0f));
 	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["Body"]]), glm::vec3(0.0, 1.0, 0.0));
 	painter->drawMesh(IndexMap["Body"], modelView, light, camera, 1);
 	
@@ -486,7 +488,7 @@ void drawAmbulance()
 	glm::mat4 modelView = AmbulanceBody->getModelMatrix();
 	// Ambulance Body
 	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["AmbulanceBody"]]), glm::vec3(0.0f, 1.0f, 0.0f));
-	modelView = glm::translate(modelView, glm::vec3(2.5f, AmbulanceFrontWheels->getHeight() * 0.2, 64.0f));
+	modelView = glm::translate(modelView, glm::vec3(0.0f, AmbulanceFrontWheels->getHeight() * 0.2, 0.0f));
 	painter->drawMesh(IndexMap["AmbulanceBody"], modelView, light, camera, 1);
 
 	modelView = glm::translate(modelView, glm::vec3(0.0f, -AmbulanceFrontWheels->getHeight() * 0.2, 0.0f));
@@ -598,7 +600,6 @@ void display()
 	// 拿剑小人
 	chr_sword->setScale(Scale[2]);
 	modelView = chr_sword->getModelMatrix();
-	modelView = glm::translate(modelView, glm::vec3(1.0, 0.0, 16.0));
 	modelView = glm::rotate(modelView, glm::radians(Theta[2]), glm::vec3(0.0, 1.0, 0.0));
 	painter->drawMesh(IndexMap["chr_sword"], modelView, light, camera, 1);
 
