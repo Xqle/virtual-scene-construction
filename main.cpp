@@ -670,26 +670,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			{
 				CurCtrlMesh = (CurCtrlMesh + 1) % NumCtrlMesh;
 				CurMeshName = CtrlMeshMap[CurCtrlMesh];
-				if (CurMeshName != "camera")
+				if (CurMeshName == "camera")
 				{
-					//调整相机角度到当前控制的Mesh的后上方
-					GLfloat angle = Theta[IndexMap[CurMeshName]];
-					glm::vec3 trans;
-					if (CurMeshName == "Body") trans = Body->getTranslation();
-					else if (CurMeshName == "AmbulanceBody") trans = AmbulanceBody->getTranslation();
-					glm::vec3 dir = glm::normalize(glm::vec3(sin(glm::radians(angle)), 0.0f, cos(glm::radians(angle))));
-					camera->pitch = 0.0f;
-					camera->yaw = -angle;  //注意updatecamera里为cos(90 + yaw)，sin(angle) = cos(90 - angle);
-					camera->upAngle = 15.00f;
-					camera->eye = glm::vec4(trans - 2.0f * dir + glm::vec3(0.0f, 1.0f, 0.0f), 1.0);
-				}
-				else
-				{
-					//否则给个弹出效果提示用户切换到了相机
+					//如果是相机，给个弹出效果提示用户切换到了相机
 					GLfloat angle = Theta[IndexMap["AmbulanceBody"]];
 					glm::vec3 dir = glm::normalize(glm::vec3(sin(glm::radians(angle)), 0.0f, cos(glm::radians(angle))));
 					camera->eye += glm::vec4(-dir + glm::vec3(0.0f, 0.1f, 0.0f), 1.0);
-				}
+				} 
 			}
 			break;
 		case GLFW_KEY_ESCAPE: 
@@ -802,10 +789,8 @@ void process_key_input(GLFWwindow *window)
 			}
 	}
 	// 如果控制的不是相机就进行处理
-	if (CtrlMeshMap[CurCtrlMesh] != "camera" && (KeyMap["W"] || KeyMap["S"] || KeyMap["A"] || KeyMap["D"]))
-	{
-		moveanimation();
-
+	if (CtrlMeshMap[CurCtrlMesh] != "camera")
+	{ 
 		auto dist = 0.05 * moveSpeed;
 		glm::vec3 trans;
 		// 获取对应物体的T矩阵
@@ -827,38 +812,42 @@ void process_key_input(GLFWwindow *window)
 		{
 			camera->eye = glm::vec4(trans - 2.0f * dir + glm::vec3(0.0f, 1.0f, 0.0f), 1.0);
 			camera->yaw = -angle;
+			camera->upAngle = 15.0f;
 		}
-		// W/S控制前进后退，A/D控制左右转向
-		if (KeyMap["W"])
-			trans += glm::vec3(dist * sin(glm::radians(angle)), 0.0, dist * cos(glm::radians(angle)));
-		if (KeyMap["S"])
-			trans -= glm::vec3(dist * sin(glm::radians(angle)), 0.0, dist * cos(glm::radians(angle)));
-		if (KeyMap["A"])
+		if ((KeyMap["W"] || KeyMap["S"] || KeyMap["A"] || KeyMap["D"]))
 		{
-			camera->yaw = -angle;  // 转弯时强制锁定视角
-			if (KeyMap["LEFT"]) camera->yaw += 90.0f;
-			// 让当前物体的第0层转向
-			Theta[IndexMap[CurMeshName]] += rotateSpeed;
-			if (Theta[IndexMap[CurMeshName]] > 360.0f) Theta[IndexMap[CurMeshName]] -= 360.0f;
+			moveanimation();// W/S控制前进后退，A/D控制左右转向
+			if (KeyMap["W"])
+				trans += glm::vec3(dist * sin(glm::radians(angle)), 0.0, dist * cos(glm::radians(angle)));
+			if (KeyMap["S"])
+				trans -= glm::vec3(dist * sin(glm::radians(angle)), 0.0, dist * cos(glm::radians(angle)));
+			if (KeyMap["A"])
+			{
+				camera->yaw = -angle;  // 转弯时强制锁定视角
+				if (KeyMap["LEFT"]) camera->yaw += 90.0f;
+				// 让当前物体的第0层转向
+				Theta[IndexMap[CurMeshName]] += rotateSpeed;
+				if (Theta[IndexMap[CurMeshName]] > 360.0f) Theta[IndexMap[CurMeshName]] -= 360.0f;
+			}
+			if (KeyMap["D"])
+			{
+				camera->yaw = -angle;  // 转弯时强制锁定视角
+				if (KeyMap["LEFT"]) camera->yaw += 90.0f;
+				// 让当前物体的第0层转向
+				Theta[IndexMap[CurMeshName]] -= rotateSpeed;
+				if (Theta[IndexMap[CurMeshName]] < 0.0f) Theta[IndexMap[CurMeshName]] += 360.0f;
+			}
+			// 记得保存T矩阵
+			// 空气墙
+			trans.x = std::min(24.5f, trans.x);
+			trans.x = std::max(-24.5f, trans.x);
+			trans.z = std::min(24.5f, trans.z);
+			trans.z = std::max(-24.5f, trans.z);
+			if (CurMeshName == "Body")
+				Body->setTranslation(trans);
+			else if (CurMeshName == "AmbulanceBody")
+				AmbulanceBody->setTranslation(trans);
 		}
-		if (KeyMap["D"])
-		{
-			camera->yaw = -angle;  // 转弯时强制锁定视角
-			if (KeyMap["LEFT"]) camera->yaw += 90.0f;
-			// 让当前物体的第0层转向
-			Theta[IndexMap[CurMeshName]] -= rotateSpeed;
-			if (Theta[IndexMap[CurMeshName]] < 0.0f) Theta[IndexMap[CurMeshName]] += 360.0f;
-		}
-		// 记得保存T矩阵
-		// 空气墙
-		trans.x = std::min(24.5f, trans.x);
-		trans.x = std::max(-24.5f, trans.x);
-		trans.z = std::min(24.5f, trans.z);
-		trans.z = std::max(-24.5f, trans.z);
-		if (CurMeshName == "Body")
-			Body->setTranslation(trans);
-		else if (CurMeshName == "AmbulanceBody")
-			AmbulanceBody->setTranslation(trans);
 	}
 	// 如果控制的是相机，则将按键传到相机
 	else camera->keyboard(window);
