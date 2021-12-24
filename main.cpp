@@ -27,6 +27,7 @@ int HEIGHT = 900;
 int mainWindow;
 
 Camera* camera = new Camera();
+float lightXoffset, lightZoffset;
 Light* light = new Light();
 MeshPainter* painter = new MeshPainter();
 
@@ -160,15 +161,6 @@ void moveanimation()
 	}
 }	
 
-
-// 尺寸参数
-const GLfloat BASE_HEIGHT      = 0.2;
-const GLfloat BASE_WIDTH       = 0.5;
-const GLfloat UPPER_ARM_HEIGHT = 0.3;
-const GLfloat UPPER_ARM_WIDTH  = 0.2;
-const GLfloat LOWER_ARM_HEIGHT = 0.4;
-const GLfloat LOWER_ARM_WIDTH  = 0.1;
-
 void init()
 {
 	std::string vshader, cfshader, tfshader, NoPhonefshader;
@@ -184,12 +176,12 @@ void init()
 	// 设置光源位置  --  0
 	IndexMap["light"] = idx++;
 	light->readObj("assets/Myobj/sun/sun.obj");
-	light->setTranslation(glm::vec3(20.0, 45.0f, 20.0));
+	light->setTranslation(glm::vec3(20.0, 30.0f, 20.0));
 	light->setScale(glm::vec3(2, 2, 2));
 	light->setAmbient(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 环境光
 	light->setDiffuse(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 漫反射
 	light->setSpecular(glm::vec4(1.0, 1.0, 1.0, 1.0)); // 镜面反射
-	painter->addMesh(light, "light", "assets/Myobj/sun/sun.png", vshader, tfshader);
+	painter->addMesh(light, "light", "assets/Myobj/sun/sun.png", vshader, NoPhonefshader);
 	meshList.push_back(light);
 
 	// BackGround  --  1
@@ -502,6 +494,7 @@ void display()
 
 	modelView = BackGround->getModelMatrix();
 	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
+	modelView = glm::translate(modelView, glm::vec3(0.0f, - BackGround->getHeight() / 4.0f, 0.0f));
 	painter->drawMesh(1, modelView, light, camera, 0);
 
 	modelView = land->getModelMatrix();
@@ -542,7 +535,14 @@ void printHelp()
 		"S:	Control the camera to move backward" << std::endl <<
 		"A:	Control the camera to move left" << std::endl <<
 		"D:	Control the camera to move right" << std::endl <<
-		"SPACE: Switch to the next mesh" << std::endl;
+		"SPACE: Switch to the next mesh" << 
+		
+		std::endl <<
+		"[Light]" << std::endl << 
+		"I:	Control the light to move forward on the Z axis" << std::endl <<
+		"K:	Control the light to move backward on the Z axis" << std::endl <<
+		"J:	Control the light to move forward on the X axis" << std::endl <<
+		"L:	Control the light to move backward on the X axis" << std::endl <<
 		
 }
 
@@ -637,6 +637,28 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 				rotateSpeedBase = std::max(rotateSpeedBase - 10.0f, 50.0f);
 			}
 			break;
+		//光源控制
+		case GLFW_KEY_I:
+		case GLFW_KEY_K:
+		case GLFW_KEY_J:
+		case GLFW_KEY_L:
+			if (action == GLFW_PRESS || action == GLFW_REPEAT)
+			{
+				glm::vec3 trans = light->getTranslation();
+				// 获得移动方向
+				int zdir = 0, xdir = 0;
+				if (key == GLFW_KEY_I || key == GLFW_KEY_K)
+					zdir = key == GLFW_KEY_I ? zdir = -1 : 1;
+				else 
+					xdir = key == GLFW_KEY_J ? xdir = -1 : 1;
+				
+				// 移动并加上空气墙限制
+				if (trans.z + zdir * 0.5 < 24.5f && trans.z + zdir * 0.5 > -24.5f) trans.z += zdir * 0.5;
+				if (trans.x + xdir * 0.5 < 24.5f && trans.x + xdir * 0.5 > -24.5f) trans.x += xdir * 0.5;
+				light->setTranslation(glm::vec3(trans.x, trans.y, trans.z));
+
+			}
+
 		}
 	}
 }
@@ -705,10 +727,10 @@ void process_key_input(GLFWwindow *window)
 		}
 		// 记得保存T矩阵
 		// 空气墙
-		trans.x = std::min(25.0f, trans.x);
-		trans.x = std::max(-25.0f, trans.x);
-		trans.z = std::min(25.0f, trans.z);
-		trans.z = std::max(-25.0f, trans.z);
+		trans.x = std::min(24.5f, trans.x);
+		trans.x = std::max(-24.5f, trans.x);
+		trans.z = std::min(24.5f, trans.z);
+		trans.z = std::max(-24.5f, trans.z);
 		if (CurMeshName == "Body")
 			Body->setTranslation(trans);
 		else if (CurMeshName == "AmbulanceBody")
