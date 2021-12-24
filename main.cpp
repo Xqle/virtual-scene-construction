@@ -739,35 +739,53 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			}
 			break;
 		//光源控制
-		case GLFW_KEY_I:
+		case GLFW_KEY_I: 
+			if (action == GLFW_PRESS) KeyMap["I"] = true;
+			else if (action == GLFW_RELEASE) KeyMap["I"] = false;
+			break;
 		case GLFW_KEY_K:
+			if (action == GLFW_PRESS) KeyMap["K"] = true;
+			else if (action == GLFW_RELEASE) KeyMap["K"] = false;
+			break;
 		case GLFW_KEY_J:
+			if (action == GLFW_PRESS) KeyMap["J"] = true;
+			else if (action == GLFW_RELEASE) KeyMap["J"] = false;
+			break;
 		case GLFW_KEY_L:
-			if (action == GLFW_PRESS || action == GLFW_REPEAT)
-			{
-				glm::vec3 trans = light->getTranslation();
-				// 获得移动方向
-				int zdir = 0, xdir = 0;
-				if (key == GLFW_KEY_I || key == GLFW_KEY_K)
-					zdir = key == GLFW_KEY_I ? zdir = -1 : 1;
-				else 
-					xdir = key == GLFW_KEY_J ? xdir = -1 : 1;
-				
-				// 移动并加上空气墙限制
-				if (trans.z + zdir * 0.5 < 24.5f && trans.z + zdir * 0.5 > -24.5f) trans.z += zdir * 0.5;
-				if (trans.x + xdir * 0.5 < 24.5f && trans.x + xdir * 0.5 > -24.5f) trans.x += xdir * 0.5;
-				light->setTranslation(glm::vec3(trans.x, trans.y, trans.z));
-
-			}
-
+			if (action == GLFW_PRESS) KeyMap["L"] = true;
+			else if (action == GLFW_RELEASE) KeyMap["L"] = false;
+			break;
 		}
 	}
 }
 
 void process_key_input(GLFWwindow *window)
 {
-	// 如果是当前Mesh是路飞，在全部键松开缓慢恢复站立姿势
-	if (CurMeshName == "Body" && !KeyMap["W"] && !KeyMap["S"] && !KeyMap["A"] && !KeyMap["D"])
+	// 窗口控制
+	if (KeyMap["ESCAPE"]) exit(EXIT_SUCCESS);
+
+	// 光源控制
+	if (KeyMap["I"] || KeyMap["K"] || KeyMap["J"] || KeyMap["L"])
+	{
+		glm::vec3 trans = light->getTranslation();
+		// 获得移动方向
+		int zdir = 0, xdir = 0;
+		if (KeyMap["I"] || KeyMap["K"])
+			zdir = KeyMap["I"] ? zdir = -1 : 1;
+		else
+			xdir = KeyMap["J"] ? xdir = -1 : 1;
+
+		// 移动并加上空气墙限制
+		float dist = 0.1 * moveSpeed;
+		if (trans.z + zdir * dist < 24.5f && trans.z + zdir * dist > -24.5f) trans.z += zdir * dist;
+		if (trans.x + xdir * dist < 24.5f && trans.x + xdir * dist > -24.5f) trans.x += xdir * dist;
+		light->setTranslation(glm::vec3(trans.x, trans.y, trans.z));
+	}
+	
+	// Mesh / Camera控制
+
+	// 如果是当前Mesh不是路飞，或者WASD全部键松开，路飞缓慢恢复站立姿势
+	if (CurMeshName != "Body" || !KeyMap["W"] && !KeyMap["S"] && !KeyMap["A"] && !KeyMap["D"])
 	{
 		for (int i = IndexMap["Body"]; i < IndexMap["AmbulanceBody"]; i++)
 			if (i != IndexMap["Body"] && fabs(Theta[i]) > 0.1)
@@ -776,10 +794,8 @@ void process_key_input(GLFWwindow *window)
 				Theta[i] -= 2 * s * rotateSpeed;
 			}
 	}
-
-	if (KeyMap["ESCAPE"]) exit(EXIT_SUCCESS);
 	// 如果控制的不是相机就进行处理
-	else if (CtrlMeshMap[CurCtrlMesh] != "camera" && (KeyMap["W"] || KeyMap["S"] || KeyMap["A"] || KeyMap["D"]))
+	if (CtrlMeshMap[CurCtrlMesh] != "camera" && (KeyMap["W"] || KeyMap["S"] || KeyMap["A"] || KeyMap["D"]))
 	{
 		moveanimation();
 
