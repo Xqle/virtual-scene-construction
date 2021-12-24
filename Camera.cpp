@@ -191,4 +191,4 @@ void Camera::mouse(double xpos, double ypos)
 		pitch = 89.0f;
 	if (pitch < -89.0f)
 		pitch = -89.0f;
-}
+} 
