@@ -104,7 +104,7 @@ void Camera::caldeltaTime(float currentFrame)
 }
 
 void Camera::initCamera(){
-	radius = 2.0;
+	radius = 23.0;
 	rotateAngle = 0.0;
 	upAngle = 0.0;
 	fovy = 45.0;

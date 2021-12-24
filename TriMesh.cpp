@@ -48,7 +48,7 @@ TriMesh::TriMesh()
 	translation = glm::vec3(0.0);
 	ambient = glm::vec4(0.3, 0.3, 0.3, 1.0);
 	diffuse = glm::vec4(0.7, 0.7, 0.7, 1.0);
-	specular = glm::vec4(0.2, 0.2, 0.2, 1.0);
+	specular = glm::vec4(0.3, 0.3, 0.3, 1.0);
 	shininess = 1.0;
 }
 

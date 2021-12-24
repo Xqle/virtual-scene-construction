@@ -60,6 +60,13 @@ TriMesh* RightLowerLeg = new TriMesh();
 TriMesh* AmbulanceBody = new TriMesh();
 TriMesh* AmbulanceFrontWheels = new TriMesh();
 TriMesh* AmbulanceBackWheels = new TriMesh();
+
+// 树
+TriMesh* Tree1 = new TriMesh();
+TriMesh* Tree2 = new TriMesh();
+
+// 城堡
+TriMesh* Castle = new TriMesh();
 //给对应mesh下标建立索引
 const int NumMeshes = 200;
 std::map<std::string, int> IndexMap;
@@ -360,6 +367,28 @@ void init()
 	painter->addMesh(AmbulanceBackWheels, "AmbulanceBackWheels", "assets/Myobj/Ambulance/AmbulanceBackWheels.png", vshader, tfshader);
 	meshList.push_back(AmbulanceBackWheels);
 
+	// Tree1 -- 19;
+	IndexMap["Tree1"] = idx++;
+	Tree1->setNormalize(false);
+	Tree1->readObj("assets/Myobj/tree/tree1.obj");
+	painter->addMesh(Tree1, "Tree1", "assets/Myobj/tree/tree1.png", vshader, tfshader);
+	meshList.push_back(Tree1);
+
+	// Tree2 -- 20;
+	IndexMap["Tree2"] = idx++;
+	Tree2->setNormalize(false);
+	Tree2->readObj("assets/Myobj/tree/tree2.obj");
+	painter->addMesh(Tree2, "Tree2", "assets/Myobj/tree/tree2.png", vshader, tfshader);
+	meshList.push_back(Tree2);
+
+	// Castle -- 21
+	IndexMap["Castle"] = idx++;
+	Castle->setNormalize(false);
+	Castle->readObj("assets/Myobj/Castle/Castle.obj");
+	Castle->setScale(glm::vec3(5.0f, 5.0f, 5.0f));
+	Castle->setTranslation(glm::vec3(0.0f, 0.0f, -5.0f));
+	painter->addMesh(Castle, "Castle", "assets/Myobj/Castle/Castle.png", vshader, tfshader);
+	meshList.push_back(Castle);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
@@ -370,7 +399,7 @@ void drawLuffy()
 	// **** 画Body ****
 	MatrixStack mstack;
 	glm::mat4 modelView = Body->getModelMatrix();
-	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerLeg->getHeight() + LeftUpperLeg->getHeight() - bias, 0.0));
+	modelView = glm::translate(modelView, glm::vec3(0.0, LeftLowerLeg->getHeight() + LeftUpperLeg->getHeight() - bias, 1200.0f));
 	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["Body"]]), glm::vec3(0.0, 1.0, 0.0));
 	painter->drawMesh(IndexMap["Body"], modelView, light, camera, 1);
 	
@@ -451,14 +480,13 @@ void drawLuffy()
 	modelView = glm::translate(modelView, glm::vec3(0.0, -RightLowerLeg->getHeight() + bias / 2, 0.0));
 	painter->drawMesh(IndexMap["RightLowerLeg"], modelView, light, camera, 1);
 }
-
 void drawAmbulance()
 {
 	MatrixStack mstack;
 	glm::mat4 modelView = AmbulanceBody->getModelMatrix();
 	// Ambulance Body
 	modelView = glm::rotate(modelView, glm::radians(Theta[IndexMap["AmbulanceBody"]]), glm::vec3(0.0f, 1.0f, 0.0f));
-	modelView = glm::translate(modelView, glm::vec3(0.0f, AmbulanceFrontWheels->getHeight() * 0.2, 0.0f));
+	modelView = glm::translate(modelView, glm::vec3(2.5f, AmbulanceFrontWheels->getHeight() * 0.2, 64.0f));
 	painter->drawMesh(IndexMap["AmbulanceBody"], modelView, light, camera, 1);
 
 	modelView = glm::translate(modelView, glm::vec3(0.0f, -AmbulanceFrontWheels->getHeight() * 0.2, 0.0f));
@@ -479,35 +507,107 @@ void drawAmbulance()
 	painter->drawMesh(IndexMap["AmbulanceBackWheels"], modelView, light, camera, 1);
 
 }
+void drawTree()
+{
+	// 城堡周围的Tree1
+	float zoffset = 10.0f;
+	glm::mat4 modelView = Tree1->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(3.0f, 0.0f, -5.0f + zoffset));
+	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
+	painter->drawMesh(IndexMap["Tree1"], modelView, light, camera, 1);
 
+	modelView = Tree1->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(-3.0f, 0.0f, -5.0f + zoffset));
+	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
+	painter->drawMesh(IndexMap["Tree1"], modelView, light, camera, 1);
+
+	modelView = Tree1->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(10.0f, 0.0f, -12.5f + zoffset));
+	modelView = glm::rotate(modelView, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
+	painter->drawMesh(IndexMap["Tree1"], modelView, light, camera, 1);
+
+	modelView = Tree1->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(10.0f, 0.0f, -17.5f + zoffset));
+	modelView = glm::rotate(modelView, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
+	painter->drawMesh(IndexMap["Tree1"], modelView, light, camera, 1);
+
+	modelView = Tree1->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(-10.0f, 0.0f, -12.5f + zoffset));
+	modelView = glm::rotate(modelView, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
+	painter->drawMesh(IndexMap["Tree1"], modelView, light, camera, 1);
+
+	modelView = Tree1->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(-10.0f, 0.0f, -17.5f + zoffset));
+	modelView = glm::rotate(modelView, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
+	painter->drawMesh(IndexMap["Tree1"], modelView, light, camera, 1);
+
+	modelView = Tree1->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(3.0f, 0.0f, -25.0f + zoffset));
+	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
+	painter->drawMesh(IndexMap["Tree1"], modelView, light, camera, 1);
+
+	modelView = Tree1->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(-3.0f, 0.0f, -25.0f + zoffset));
+	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
+	painter->drawMesh(IndexMap["Tree1"], modelView, light, camera, 1);
+
+	// Tree2
+	modelView = Tree2->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(20.0f, 0.0f, 20.0f));
+	painter->drawMesh(IndexMap["Tree2"], modelView, light, camera, 1);
+
+	modelView = Tree2->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(20.0f, 0.0f, -20.0f));
+	painter->drawMesh(IndexMap["Tree2"], modelView, light, camera, 1);
+
+	modelView = Tree2->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(-20.0f, 0.0f, 20.0f));
+	painter->drawMesh(IndexMap["Tree2"], modelView, light, camera, 1);
+
+	modelView = Tree2->getModelMatrix();
+	modelView = glm::translate(modelView, glm::vec3(-20.0f, 0.0f, -20.0f));
+	painter->drawMesh(IndexMap["Tree2"], modelView, light, camera, 1);
+}
 void display()
 {
-// #ifdef __APPLE__ // 解决 macOS 10.15 显示画面缩小问题
-// 	glViewport(0, 0, WIDTH * 2, HEIGHT * 2);
-// #endif
+	// #ifdef __APPLE__ // 解决 macOS 10.15 显示画面缩小问题
+	// 	glViewport(0, 0, WIDTH * 2, HEIGHT * 2);
+	// #endif
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::mat4 modelView = glm::mat4(1.0);
-	
-	modelView = light->getModelMatrix();
-	painter->drawMesh(0, modelView, light, camera, 0);
 
+	// 光源
+	modelView = light->getModelMatrix();
+	painter->drawMesh(IndexMap["light"], modelView, light, camera, 0);
+
+	// 背景
 	modelView = BackGround->getModelMatrix();
 	modelView = glm::scale(modelView, glm::vec3(2.0f, 2.0f, 2.0f));
-	modelView = glm::translate(modelView, glm::vec3(0.0f, - BackGround->getHeight() / 4.0f, 0.0f));
-	painter->drawMesh(1, modelView, light, camera, 0);
+	modelView = glm::translate(modelView, glm::vec3(0.0f, -BackGround->getHeight() / 4.0f, 0.0f));
+	painter->drawMesh(IndexMap["BackGround"], modelView, light, camera, 0);
 
+	// 草地
 	modelView = land->getModelMatrix();
-	painter->drawMesh(2, modelView, light, camera, 0);
+	painter->drawMesh(IndexMap["land"], modelView, light, camera, 0);
 
+	// 拿剑小人
 	chr_sword->setScale(Scale[2]);
 	modelView = chr_sword->getModelMatrix();
-	modelView = glm::translate(modelView, glm::vec3(1.0, 0.0, 1.0));
+	modelView = glm::translate(modelView, glm::vec3(1.0, 0.0, 16.0));
 	modelView = glm::rotate(modelView, glm::radians(Theta[2]), glm::vec3(0.0, 1.0, 0.0));
-	painter->drawMesh(3, modelView, light, camera, 1);
+	painter->drawMesh(IndexMap["chr_sword"], modelView, light, camera, 1);
 
 	drawLuffy();
 	drawAmbulance();
+	drawTree();
+
+	modelView = Castle->getModelMatrix();
+	painter->drawMesh(IndexMap["Castle"], modelView, light, camera, 1);
 }
 
 void printHelp()
@@ -535,14 +635,14 @@ void printHelp()
 		"S:	Control the camera to move backward" << std::endl <<
 		"A:	Control the camera to move left" << std::endl <<
 		"D:	Control the camera to move right" << std::endl <<
-		"SPACE: Switch to the next mesh" << 
-		
+		"SPACE: Switch to the next mesh" <<
+
 		std::endl <<
-		"[Light]" << std::endl << 
+		"[Light]" << std::endl <<
 		"I:	Control the light to move forward on the Z axis" << std::endl <<
 		"K:	Control the light to move backward on the Z axis" << std::endl <<
 		"J:	Control the light to move forward on the X axis" << std::endl <<
-		"L:	Control the light to move backward on the X axis" << std::endl <<
+		"L:	Control the light to move backward on the X axis" << std::endl;
 		
 }
 
